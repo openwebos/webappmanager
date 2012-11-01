@@ -22,7 +22,7 @@
 #include "VirtualKeyboardPreferences.h"
 #include "Preferences.h"
 #include "Logging.h"
-#include "SystemUiController.h"
+//#include "SystemUiController.h"
 #include "JSONUtils.h"
 
 VirtualKeyboardPreferences & VirtualKeyboardPreferences::instance()
@@ -61,7 +61,8 @@ void VirtualKeyboardPreferences::applyInitSettings(VirtualKeyboard * keyboard)
 		keyboard->requestSize(mKeyboardSize);
 		activateCombo();
 	}
-	connect(SystemUiController::instance(), SIGNAL(signalBootFinished()), SLOT(bootFinished()));
+    //NFU: systemuicontroller dependency
+    //connect(SystemUiController::instance(), SIGNAL(signalBootFinished()), SLOT(bootFinished()));
 }
 
 void VirtualKeyboardPreferences::bootFinished()

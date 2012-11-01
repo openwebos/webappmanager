@@ -33,7 +33,7 @@
 #include "VariantAnimation.h"
 #include "HostWindow.h"
 #include "ProgressAnimation.h"
-#include "TouchPlot.h"
+//#include "TouchPlot.h"
 
 #include <QGraphicsView>
 #include <QGraphicsObject>
@@ -56,7 +56,7 @@ struct WindowProperties;
 class WindowManagerBase;
 class MetaKeyManager;
 class CoreNaviManager;
-class ReticleItem;
+//class ReticleItem;
 class QDeclarativeEngine;
 class SharedGlobalProperties;
 
@@ -209,7 +209,7 @@ public:
 	static void dumpFpsHistory();
 	static void resetFpsBuffer(int newBufSize);
 
-	static void enableTouchPlotOption(TouchPlot::TouchPlotOption_t type, bool enable);
+    //static void enableTouchPlotOption(TouchPlot::TouchPlotOption_t type, bool enable);
 
 	virtual void resizeWindowManagers(int width, int height);
 
@@ -291,7 +291,7 @@ protected:
 	bool     m_deviceIsPortraitType;
 
 	QGraphicsItemGroup* m_uiElementsGroup;
-	ReticleItem* m_reticle;
+    //ReticleItem* m_reticle;
 
 	bool m_bootingUp;
 

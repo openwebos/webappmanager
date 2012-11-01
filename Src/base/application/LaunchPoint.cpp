@@ -27,7 +27,7 @@
 
 #include "ApplicationDescription.h"
 #include "PackageDescription.h"
-#include "ApplicationManager.h"
+//#include "ApplicationManager.h"
 #include "LaunchPoint.h"
 #include "Logging.h"
 #include "Utils.h"
@@ -263,6 +263,7 @@ int LaunchPoint::compareByKeys(const LaunchPoint* lp) const
 //TODO: this is kind of funky; a launchpoint of an app should really just present the info for the app.
 json_object* LaunchPoint::toJSON() const
 {
+    /*
 	json_object* json = json_object_new_object();
 	json_object_object_add(json, (char*) "id",   json_object_new_string((char*) id().c_str()));
 	if (m_appDesc) {
@@ -309,6 +310,7 @@ json_object* LaunchPoint::toJSON() const
 	}
 
 	return json;
+    */
 }
 #include <QDebug>
 QPixmap LaunchPoint::icon() const

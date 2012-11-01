@@ -23,7 +23,7 @@
 
 #include "WebAppFactoryMinimal.h"
 
-#include "AlertWebApp.h"
+//#include "AlertWebApp.h"
 #include "CardWebApp.h"
 #include "Settings.h"
 #include "WebAppBase.h"

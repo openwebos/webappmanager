@@ -26,6 +26,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <QWebSettings>
+
 
 #include <PIpcChannel.h>
 #include <PIpcClient.h>
@@ -223,7 +225,6 @@ WebAppManager::WebAppManager()
 	sInstance = this;
 	m_orientation = Event::Orientation_Up;
 	m_deletingPages = false;
-	m_imePopupApp = 0;
 	m_uiWidth  = 0;
 	m_uiHeight = 0;
 	m_deviceIsPortraitType = true;

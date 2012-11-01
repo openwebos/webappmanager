@@ -248,7 +248,7 @@ private:
 	LSPalmService* m_service;
 	LSHandle* m_servicePublic;
 	LSHandle* m_servicePrivate;
-	WebAppBase* m_imePopupApp;
+    //WebAppBase* m_imePopupApp;
 	WebKitEventListener* m_wkEventListener;
 	PageList m_pagesToDeleteList;
 	bool m_deletingPages;

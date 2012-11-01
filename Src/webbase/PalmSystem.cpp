@@ -4,7 +4,7 @@
 #include "AlertWebApp.h"
 #include "BannerMessageEventFactory.h"
 #include "CardWebApp.h"
-#include "DeviceInfo.h"
+//#include "DeviceInfo.h"
 #include "KeyboardMapping.h"
 #include "Localization.h"
 #include "NewContentIndicatorEventFactory.h"
@@ -1071,8 +1071,8 @@ QString PalmSystem::videoOrientation() const
 
 QString PalmSystem::deviceInfo() const
 {
-    QString deviceInfo = QString::fromStdString(DeviceInfo::instance()->jsonString());
-    return deviceInfo.isEmpty() ? "{}" : deviceInfo;
+    //QString deviceInfo = QString::fromStdString(DeviceInfo::instance()->jsonString());
+    //return deviceInfo.isEmpty() ? "{}" : deviceInfo;
 }
 
 bool PalmSystem::isActivated() const

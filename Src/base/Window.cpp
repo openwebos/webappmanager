@@ -26,8 +26,8 @@
 
 #include "Window.h"
 
-#include "ApplicationManager.h"
-#include "WindowServer.h"
+//#include "ApplicationManager.h"
+//#include "WindowServer.h"
 
 Window::Window(Type type, const uint32_t bufWidth, const uint32_t bufHeight, bool hasAlpha)
 	: m_type(type)
@@ -53,7 +53,7 @@ Window::Window(Type type, const uint32_t bufWidth, const uint32_t bufHeight, boo
 		QColor fillColor(255, 255, 255, hasAlpha ? 0 : 255);
 		m_screenPixmap.fill(fillColor);
 	}
-	WindowServer::registerWindow(this);
+    //WindowServer::registerWindow(this);
 }
 
 Window::Window(Type type, const QPixmap& pix)
@@ -69,19 +69,19 @@ Window::Window(Type type, const QPixmap& pix)
 {
 	setVisibleDimensions(m_bufWidth, m_bufHeight);
 
-	WindowServer::registerWindow(this);
+    //WindowServer::registerWindow(this);
 }
 
 Window::~Window()
 {
-	WindowServer::unregisterWindow(this);
+    //WindowServer::unregisterWindow(this);
 }
 
 
 void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
 	//lock();
-
+/*
 	if (m_type == Type_QtNativePaintWindow)
 	{
 		g_critical("%s: window of type QtNativePaintWindow attempting base-class paint()!",__PRETTY_FUNCTION__);
@@ -96,13 +96,13 @@ void Window::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 	
 	painter->drawPixmap(m_visibleBounds.x(), m_visibleBounds.y(), *pix,
 						0, 0, m_visibleBounds.width(), m_visibleBounds.height());
-
+*/
 	//unlock();
 }
 
 bool Window::mouseGrabbed() const
 {
-	return (scene() != NULL) && (scene()->mouseGrabberItem() == this);
+    //return (scene() != NULL) && (scene()->mouseGrabberItem() == this);
 }
 
 void Window::setMouseGrabbed(bool grabbed)
@@ -172,7 +172,7 @@ ApplicationDescription* Window::appDescription() const
 	if (m_appDesc)
 		return m_appDesc;
 
-	m_appDesc = ApplicationManager::instance()->getAppById(m_appId);
+    // m_appDesc = ApplicationManager::instance()->getAppById(m_appId);
 
 	return m_appDesc;
 }

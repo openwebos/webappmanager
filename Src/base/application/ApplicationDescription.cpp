@@ -33,7 +33,7 @@
 #include "QtUtils.h"
 #include "Settings.h"
 #include "MimeSystem.h"
-#include "ApplicationManager.h"
+//#include "ApplicationManager.h"
 #include <QMetaMethod>
 #include <QMetaObject>
 #include "Preferences.h"
@@ -486,6 +486,7 @@ ApplicationDescription* ApplicationDescription::fromFile(const std::string& file
 		appDesc->updateSysmgrBuiltinWithLocalization();
 
 		//try and create a launch helper
+        /*
 		if (appDesc->initSysmgrBuiltIn(ApplicationManager::instance(),builtinEntrypt,builtinArgs) == false)
 		{
 			//failed...something was specified wrong
@@ -494,6 +495,7 @@ ApplicationDescription* ApplicationDescription::fromFile(const std::string& file
 			success = false;
 			goto Done;
 		}
+        */
 	}
 Done:
 

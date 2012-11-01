@@ -17,7 +17,7 @@
 * LICENSE@@@ */
 
 
-
+#if 1
 
 #ifndef MEMORYMONITOR_H
 #define MEMORYMONITOR_H
@@ -114,3 +114,4 @@ private:
 
 #endif /* MEMORYMONITOR_H */
 
+#endif /* 0 */

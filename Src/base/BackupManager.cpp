@@ -30,7 +30,7 @@
 #include <cjson/json.h>
 
 //for launcher3 saving
-#include "pagesaver.h"
+//#include "pagesaver.h"
 
 /* BackupManager implementation is based on the API documented at https://wiki.palm.com/display/ServicesEngineering/Backup+and+Restore+2.0+API
  * On the LunaSysMgr side, this backs up launcher, quick launch and dock mode settings
@@ -157,7 +157,7 @@ void BackupManager::initFilesForBackup()
 
 		QList<QString> fileList;
 
-		DimensionsSystemInterface::PageSaver::filesForBackup(&fileList);
+        /*DimensionsSystemInterface::PageSaver::filesForBackup(&fileList);
 		for (QList<QString>::const_iterator file_it = fileList.constBegin();
 				file_it != fileList.constEnd();file_it++)
 		{
@@ -170,6 +170,7 @@ void BackupManager::initFilesForBackup()
 				}
 			}
 		}
+        */
     }
     else
     {

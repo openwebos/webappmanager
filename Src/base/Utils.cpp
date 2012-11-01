@@ -40,7 +40,7 @@
 #include <QByteArray>
 #include <QtDebug>
 
-#include "ApplicationManager.h"
+//#include "ApplicationManager.h"
 #include "ApplicationDescription.h"
 #include "Preferences.h"
 #include "Utils.h"
@@ -429,7 +429,7 @@ bool splitWindowIdentifierToAppAndProcessId(const std::string& id, std::string& 
 
 	return true;
 }
-
+/*
 std::string getResourcePathFromString(const std::string& entry, const std::string& appId,
 									  const std::string& systemResourceFolder)
 {
@@ -471,7 +471,7 @@ std::string getResourcePathFromString(const std::string& entry, const std::strin
 	// ah well... we give up
 	return std::string();
 }
-
+*/
 //Should follow conventions for virtualHost naming in webkit: WebCore/platform/KURL.cpp
 //CAUTION: modifying this to return strange paths is potentially dangerous. See ApplicationInstaller.cpp "remove" case where this fn is used
 std::string getHtml5DatabaseFolderNameForApp(const std::string& appId,std::string appFolderPath)
