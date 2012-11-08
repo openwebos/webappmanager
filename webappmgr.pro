@@ -36,7 +36,10 @@ PKGCONFIG = glib-2.0 gthread-2.0
 
 QT = core gui declarative webkit network
 
-VPATH = \
+include(Src/nyx/nyx.pri)
+
+
+VPATH += \
 		./Src \
 		./Src/base \
 		./Src/base/application \
@@ -58,8 +61,8 @@ VPATH = \
 		./Src/minimalui \
 		./Src/remote \
 		./Src/lunaui/status-bar \
-        ./Src/ime \
-        ./Src/nyx
+        ./Src/ime
+
 
 ####### LAUNCHER ADDITIONS ########
 VPATH += ./Src/lunaui/launcher
@@ -107,7 +110,7 @@ DEFINES += SHIPPING_VERSION=0
 # See the QString documentation for more information
 # DEFINES += QT_USE_FAST_OPERATOR_PLUS
 
-SOURCES = \
+SOURCES += \
         AlertWebApp.cpp \
         ApplicationDescription.cpp \
         AsyncCaller.cpp \
@@ -152,7 +155,7 @@ SOURCES = \
         Window.cpp \
         WindowedWebApp.cpp
 
-HEADERS = \
+HEADERS += \
         AlertWebApp.h \
         ApplicationDescription.h \
         AsyncCaller.h \
@@ -207,7 +210,7 @@ QMAKE_CXXFLAGS += -DFIX_FOR_QT  # -fprofile-arcs -ftest-coverage
 # Override the default (-Wall -W) from g++.conf mkspec (see linux-g++.conf)
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter -Wno-unused-variable -Wno-reorder -Wno-missing-field-initializers -Wno-extra
 
-LIBS += -lcjson -lLunaSysMgrIpc -llunaservice -lpbnjson_cpp -lssl -lsqlite3 -lssl -lcrypto -lnyx # -lgcov
+LIBS += -lcjson -lLunaSysMgrIpc -llunaservice -lpbnjson_cpp -lssl -lsqlite3 -lssl -lcrypto # -lgcov
 
 linux-g++ {
     include(desktop.pri)
@@ -293,18 +296,6 @@ contains(CONFIG_BUILD, mediaapi) {
 } else {
     SOURCES += SoundPlayerDummy.cpp
     HEADERS += SoundPlayerDummy.h
-}
-
-contains(CONFIG_BUILD, nyx) {
-    HEADERS +=  NyxInputControl.h \
-                NyxLedControl.h \
-
-    VPATH += Src/input
-
-    SOURCES += NyxInputControl.cpp \
-           NyxLedControl.cpp \
-
-    DEFINES += HAS_NYX
 }
 
 contains(CONFIG_BUILD, memchute) {
