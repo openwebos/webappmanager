@@ -26,6 +26,7 @@
 #include <sptr.h>
 
 #include "WindowedWebApp.h"
+#include "WindowTypes.h"
 #include "SysMgrDefs.h"
 #include <QGraphicsItem>
 #include <QGraphicsView>
@@ -43,7 +44,7 @@ class CardWebApp : public WindowedWebApp, public QGraphicsView
 {
 public:
 
-	CardWebApp(Window::Type winType, PIpcChannel *channel, ApplicationDescription* desc = 0);
+    CardWebApp(WindowType::Type winType, PIpcChannel *channel, ApplicationDescription* desc = 0);
 	~CardWebApp( );
 
 	virtual void thawFromCache();

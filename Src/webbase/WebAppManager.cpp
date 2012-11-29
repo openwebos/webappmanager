@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+
 #include <PIpcChannel.h>
 #include <PIpcClient.h>
 #include <PIpcBuffer.h>
@@ -37,21 +38,22 @@
 #include "CardWebApp.h"
 #include "ProcessManager.h"
 #include "Localization.h"
+#include "LocalePreferences.h"
 #include "Logging.h"
 #include "JSONUtils.h"
 #include "MemoryWatcher.h"
+#include "MutexLocker.h"
 #include "BannerMessageEventFactory.h"
 #include "Settings.h"
 #include "WebAppBase.h"
 #include "WebAppFactory.h"
 #include "WindowedWebApp.h"
-#include "Preferences.h"
+//#include "Preferences.h"
 #include "EventReporter.h"
 #include <WebKitEventListener.h>
 #include <BackupManager.h>
 #include "Utils.h"
 #include "Time.h"
-#include "ApplicationInstaller.h"
 #include "SharedGlobalProperties.h"
 
 #include <algorithm>
@@ -60,7 +62,9 @@
 
 #include <QDebug>
 
+#ifdef HAS_NYX
 #include <nyx/nyx_client.h>
+#endif HAS_NYX
 
 #define MESSAGES_INTERNAL_FILE "SysMgrMessagesInternal.h"
 #include <PIpcMessageMacros.h>
@@ -154,13 +158,13 @@ static bool PrvDumpHeapProfiler(LSHandle* lsHandle, LSMessage *message, void *us
 #endif
 
 /*
-static bool PrvEnableAccelCompositing(Window::Type winType, const std::string& appId)
+static bool PrvEnableAccelCompositing(WindowType::Type winType, const std::string& appId)
 {
-	return ((winType == Window::Type_Card ||
-			winType == Window::Type_ChildCard ||
-			winType == Window::Type_PIN ||
-			winType == Window::Type_ModalChildWindowCard ||
-			winType == Window::Type_Emergency) &&
+    return ((winType == WindowType::Type_Card ||
+            winType == WindowType::Type_ChildCard ||
+            winType == WindowType::Type_PIN ||
+            winType == WindowType::Type_ModalChildWindowCard ||
+            winType == WindowType::Type_Emergency) &&
 			!Settings::LunaSettings()->appsToDisableAccelCompositing.count(appId));
 }
 */
@@ -223,7 +227,6 @@ WebAppManager::WebAppManager()
 	sInstance = this;
 	m_orientation = Event::Orientation_Up;
 	m_deletingPages = false;
-	m_imePopupApp = 0;
 	m_uiWidth  = 0;
 	m_uiHeight = 0;
 	m_deviceIsPortraitType = true;
@@ -241,6 +244,13 @@ WebAppManager::~WebAppManager()
     delete m_Application;
 }
 
+void WebAppManager::localeChanged()
+{
+    // Don't shutdown for locale changes in minimal mode
+    if (Settings::LunaSettings()->uiType != Settings::UI_MINIMAL)
+        m_Application->exit(0);
+}
+
 void WebAppManager::run()
 {
 	threadStarting();
@@ -250,13 +260,19 @@ void WebAppManager::run()
 
 	markUniversalSearchReady();
 
+    LocalePreferences* lp = LocalePreferences::instance();
+    QObject::connect(lp, SIGNAL(prefsLocaleChanged()), SLOT(localeChanged()));
+
+#ifdef HAS_NYX
 	nyx_init();
-	
+#endif
 	//g_main_loop_run(mainLoop());
 	m_Application->exec();
 
+#ifdef HAS_NYX
     nyx_deinit();
-    
+#endif
+
 	threadStopping();
 
 	threadCleanup();
@@ -420,7 +436,7 @@ void WebAppManager::onLaunchUrl(const std::string& url, int winType,
                                 const std::string& launchingProcId)
 {
 	int errorCode = 0;
-	launchUrlInternal(url, static_cast<Window::Type>(winType), appDesc, procId,
+    launchUrlInternal(url, static_cast<WindowType::Type>(winType), appDesc, procId,
 	                  args, launchingAppId, launchingProcId, errorCode, false);
 }
 
@@ -429,7 +445,7 @@ void WebAppManager::onLaunchUrlChild(const std::string& url, int winType,
                                 	 const std::string& args, const std::string& launchingAppId,
                                 	 const std::string& launchingProcId, int& errorCode, bool isHeadless)
 {
-	launchUrlInternal(url, static_cast<Window::Type>(winType), appDesc, procId,
+    launchUrlInternal(url, static_cast<WindowType::Type>(winType), appDesc, procId,
 	                  args, launchingAppId, launchingProcId, errorCode, true);
 }
 
@@ -713,7 +729,7 @@ std::list<const ProcessBase*> WebAppManager::runningApps()
 	return apps;
 }
 
-std::list<const ProcessBase*> WebAppManager::runningApps(Window::Type winType)
+std::list<const ProcessBase*> WebAppManager::runningApps(WindowType::Type winType)
 {
 	std::list<const ProcessBase*> apps;
 
@@ -723,7 +739,7 @@ std::list<const ProcessBase*> WebAppManager::runningApps(Window::Type winType)
 		WebAppBase* app = (*it);
 
 		switch (winType) {
-		case (Window::Type_None): {
+        case (WindowType::Type_None): {
 
 			if (!app->isWindowed()) {
 				apps.push_back(static_cast<const ProcessBase*>(app->page()));
@@ -926,7 +942,7 @@ void WebAppManager::threadStopping()
 
 }
 
-WebAppBase* WebAppManager::launchUrlInternal(const std::string& url, Window::Type winType,
+WebAppBase* WebAppManager::launchUrlInternal(const std::string& url, WindowType::Type winType,
                                              const std::string& appDesc, const std::string& _procId,
                                              const std::string& args, const std::string& launchingAppId,
                                              const std::string& launchingProcId, int& errorCode, bool launchAsChild,
@@ -967,6 +983,7 @@ WebAppBase* WebAppManager::launchUrlInternal(const std::string& url, Window::Typ
 		}
 	}
 
+
 	// Low Memory handling
 	if (!ignoreLowMemory && preventAppUnderLowMemory(appId.toStdString(), winType, desc)) {
 		errorCode = SystemUiController::InternalError;
@@ -987,7 +1004,7 @@ WebAppBase* WebAppManager::launchUrlInternal(const std::string& url, Window::Typ
 
 	WebAppBase* app = WebAppFactory::instance()->createWebApp(winType, m_channel, desc);
 
-	if (winType == Window::Type_None)
+    if (winType == WindowType::Type_None)
 		addHeadlessAppToWatchList(app);
 
 	if (G_UNLIKELY(Settings::LunaSettings()->perfTesting)) {
@@ -998,7 +1015,7 @@ WebAppBase* WebAppManager::launchUrlInternal(const std::string& url, Window::Typ
 	}
 
 	if (app) {
-		SysMgrWebBridge* page = new SysMgrWebBridge(winType != Window::Type_None, QUrl(url.c_str()));
+        SysMgrWebBridge* page = new SysMgrWebBridge(winType != WindowType::Type_None, QUrl(url.c_str()));
 		app->setAppDescription(desc);
 
 		static_cast<ProcessBase*>(page)->setProcessId(QString::fromStdString(procId));
@@ -1028,7 +1045,7 @@ WebAppBase* WebAppManager::launchUrlInternal(const std::string& url, Window::Typ
 		// pre-create a card if we are launching a headless app for the first time
 		// and the launch is coming from an app with a process id
 		if(false == launchAsChild) {
-			if (winType == Window::Type_None && (launchingAppId.size() > 0 && launchingProcId.size() > 0)) {
+            if (winType == WindowType::Type_None && (launchingAppId.size() > 0 && launchingProcId.size() > 0)) {
 				page->createViewForWindowlessPage();
 			}
 		}
@@ -1040,7 +1057,7 @@ WebAppBase* WebAppManager::launchUrlInternal(const std::string& url, Window::Typ
 	return app;
 }
 
-WebAppBase* WebAppManager::launchWithPageInternal(SysMgrWebBridge* page, Window::Type winType, ApplicationDescription* parentDesc)
+WebAppBase* WebAppManager::launchWithPageInternal(SysMgrWebBridge* page, WindowType::Type winType, ApplicationDescription* parentDesc)
 {
 	if (preventAppUnderLowMemory(page->appId().toStdString(), winType, parentDesc)) {
 		g_warning("%s: Low memory condition Not allowing card app for appId: %s", __PRETTY_FUNCTION__, page->appId().toUtf8().constData());
@@ -1092,7 +1109,7 @@ void WebAppManager::closeAppInternal(WebAppBase* app)
 
 	bool cached = false;
 	
-	if( ( app->isWindowed() && Window::Type_Card == static_cast<WindowedWebApp*>(app)->windowType() )
+    if( ( app->isWindowed() && WindowType::Type_Card == static_cast<WindowedWebApp*>(app)->windowType() )
 		&& appsToKeepAlive.find(appId.toStdString()) != appsToKeepAlive.end()
 		&& app->keepAlive()
 		// Do not cache if we think this was a push-scene:
@@ -1402,7 +1419,7 @@ void WebAppManager::restartHeadLessBootApps()
 		int errorCode = 0;
 		// Do not relaunch headless apps that are kept around to improve launch speed.
 		if( appsToKeepAliveUntilMemPressure.find(appUrlPair.first.id) == appsToKeepAliveUntilMemPressure.end() ) {
-			launchUrlInternal(appUrlPair.second, Window::Type_None,
+            launchUrlInternal(appUrlPair.second, WindowType::Type_None,
 			                  appUrlPair.first.desc, std::string(), launchArgs,
 			                  std::string(), std::string(), errorCode, false, true);
 		}
@@ -1448,7 +1465,7 @@ void WebAppManager::webPageRemoved(SysMgrWebBridge* page)
 	}
 }
 
-bool WebAppManager::preventAppUnderLowMemory(const std::string& appId, Window::Type winType, ApplicationDescription* appDesc) const
+bool WebAppManager::preventAppUnderLowMemory(const std::string& appId, WindowType::Type winType, ApplicationDescription* appDesc) const
 {
     if(Settings::LunaSettings()->allowAllAppsInLowMemory) {
         return false;
@@ -1461,7 +1478,7 @@ bool WebAppManager::preventAppUnderLowMemory(const std::string& appId, Window::T
 
 	// If app is headless, we allow it only if its one of the boot time apps
 	// or if its one of the "allow under all conditions" apps
-	if (winType == Window::Type_None) {
+    if (winType == WindowType::Type_None) {
 
 		if (allowedByMemWatcher)
 			return false;
@@ -1479,7 +1496,7 @@ bool WebAppManager::preventAppUnderLowMemory(const std::string& appId, Window::T
 
 
 	// Is this a card app? We only prevent card apps
-	if (winType != Window::Type_Card)
+    if (winType != WindowType::Type_Card)
 		return false;
 
 	// Is the app one of the "allow under all conditions"
@@ -1487,7 +1504,7 @@ bool WebAppManager::preventAppUnderLowMemory(const std::string& appId, Window::T
 		return false;
 
 	// limit the number of cards we are allowed to open
-	const std::list<const ProcessBase*> cardApps = WebAppManager::instance()->runningApps(Window::Type_Card);
+    const std::list<const ProcessBase*> cardApps = WebAppManager::instance()->runningApps(WindowType::Type_Card);
 	if ((Settings::LunaSettings()->cardLimit > 0) &&
 	    ((int) cardApps.size() >= Settings::LunaSettings()->cardLimit)) {
 		g_warning("Can not open new card, reached the card limit\n");
@@ -1798,7 +1815,7 @@ bool PrvDumpRenderTree(LSHandle* lsHandle, LSMessage *message, void *user_data)
 	std::string quotes = "\"";
 	std::string replace_quotes = "\\\"";
 
-	std::list<const ProcessBase *> cards = WebAppManager::instance()->runningApps(Window::Type_Card);
+    std::list<const ProcessBase *> cards = WebAppManager::instance()->runningApps(WindowType::Type_Card);
 	for (std::list<const ProcessBase *>::const_iterator iter = cards.begin(); iter != cards.end(); iter++)
 	{
 		if (iter != cards.begin())
@@ -1838,7 +1855,7 @@ bool PrvDumpCompositedTree(LSHandle* lsHandle, LSMessage *message, void *user_da
 	std::stringstream retval;
 	retval << "{ \"cardViews\":[";
 
-	std::list<const ProcessBase *> cards = WebAppManager::instance()->runningApps(Window::Type_Card);
+    std::list<const ProcessBase *> cards = WebAppManager::instance()->runningApps(WindowType::Type_Card);
 	for (std::list<const ProcessBase *>::const_iterator iter = cards.begin(); iter != cards.end(); iter++)
 	{
 		if (iter != cards.begin())

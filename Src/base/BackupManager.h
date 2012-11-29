@@ -77,10 +77,8 @@ private:
 	bool	m_doBackupCookies;
 	std::list<std::string>	m_backupFiles;	///< List of items I'm managing the backup/restore of.
 
-	void initFilesForBackup();
-
 	static bool preBackupCallback( LSHandle* lshandle, LSMessage *message, void *user_data);
-	static bool postRestoreCallback( LSHandle* lshandle, LSMessage *message, void *user_data);
+    static bool postRestoreCallback( LSHandle* lshandle, LSMessage *message, void *user_data);
 };
 
 

@@ -25,6 +25,7 @@
 #include "Common.h"
 
 #include "WindowedWebApp.h"
+#include "WindowTypes.h"
 #include "CardWebApp.h"
 
 class PIpcChannel;
@@ -34,7 +35,7 @@ class DockWebApp : public CardWebApp
 {
 public:
 
-	DockWebApp(Window::Type winType, PIpcChannel *channel);
+    DockWebApp(WindowType::Type winType, PIpcChannel *channel);
 	~DockWebApp( );
 
 	virtual bool isCardApp() const { return true; } // $$$

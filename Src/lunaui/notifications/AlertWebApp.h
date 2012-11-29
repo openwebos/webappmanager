@@ -31,7 +31,7 @@ class AlertWebApp : public WindowedWebApp
 public:
 
 	AlertWebApp(const QString& appId, int width, int height,
-				Window::Type type, PIpcChannel *channel);
+                WindowType::Type type, PIpcChannel *channel);
 	virtual ~AlertWebApp();
 
 	virtual bool isAlertApp() const { return true; }

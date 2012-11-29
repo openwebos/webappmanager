@@ -33,9 +33,9 @@ public:
 	WebAppFactoryLuna();
 	virtual ~WebAppFactoryLuna() {}
 
-	virtual WebAppBase* createWebApp(Window::Type winType, PIpcChannel* channel, ApplicationDescription* desc = 0);
-	virtual WebAppBase* createWebApp(Window::Type winType, SysMgrWebBridge* page, PIpcChannel* channel, ApplicationDescription* desc = 0);
-	virtual WebAppBase* createWebApp(Window::Type winType, int width, int height, PIpcChannel* channel, ApplicationDescription* desc = 0);
+    virtual WebAppBase* createWebApp(WindowType::Type winType, PIpcChannel* channel, ApplicationDescription* desc = 0);
+    virtual WebAppBase* createWebApp(WindowType::Type winType, SysMgrWebBridge* page, PIpcChannel* channel, ApplicationDescription* desc = 0);
+    virtual WebAppBase* createWebApp(WindowType::Type winType, int width, int height, PIpcChannel* channel, ApplicationDescription* desc = 0);
 
 private:
 	bool m_dashboardOwnsNegativeSpace;

@@ -111,7 +111,7 @@ std::string ProcessManager::launchBootTimeApp(const std::string& appDescString)
 	ApplicationDescription* desc = ApplicationDescription::fromJsonString(appDescString.c_str());
 	
 	WebAppManager::instance()->onLaunchUrl(desc->entryPoint().c_str(),
-									  	   Window::Type_None,
+									  	   WindowType::Type_None,
 									  	   appDescString.c_str(),
 										   processId.c_str(),
 										   "{\"launchedAtBoot\":true}", "", "");
@@ -152,20 +152,20 @@ std::string ProcessManager::launch(const std::string& appDescString, const std::
 	// This now will only launch Web Apps. Native Apps are now launched by the WebAppMgrProxy.
 
 	// Find out what type of window we need to create
-	Window::Type winType = Window::Type_Card;
+    WindowType::Type winType = WindowType::Type_Card;
 	std::string winTypeStr;
 	if (extractFromJson(params, "windowType", winTypeStr)) {
 
 		if (winTypeStr == "dashboard")
-			winType = Window::Type_Dashboard;
+			winType = WindowType::Type_Dashboard;
 		else if (winTypeStr == "popupalert")
-			winType = Window::Type_PopupAlert;
+			winType = WindowType::Type_PopupAlert;
 		else if (winTypeStr == "emergency")
-			winType = Window::Type_Emergency;
+			winType = WindowType::Type_Emergency;
 		else if (winTypeStr == "dockModeWindow") // $$$ FIX THIS, it is just a patch to test Dock mode apps for now
-			winType = Window::Type_DockModeWindow;
+			winType = WindowType::Type_DockModeWindow;
 		else {
-			winType = Window::Type_Card;
+			winType = WindowType::Type_Card;
 		}
 	}
 	
@@ -189,7 +189,7 @@ std::string ProcessManager::launch(const std::string& appDescString, const std::
 		std::string url = desc->entryPoint();
 
 		if (desc->isHeadLess())
-			winType = Window::Type_None;
+			winType = WindowType::Type_None;
 
 		processId = processIdFactory();
 
@@ -228,7 +228,7 @@ std::string ProcessManager::launchModal(const std::string& appDescString, const 
 {
 	std::string processId = "";
 	errMsg.erase();
-	Window::Type winType = Window::Type_ModalChildWindowCard;
+    WindowType::Type winType = WindowType::Type_ModalChildWindowCard;
 
 	if(false == isParentPdk && 0 >= launchingProcId.size()) {
 		errorCode = SystemUiController::MissingProcessId;
@@ -249,9 +249,9 @@ std::string ProcessManager::launchModal(const std::string& appDescString, const 
 	std::string url = desc->entryPoint();
 	processId = processIdFactory();
 
-	// if we want to create a headless app, the type is Window::Type_None else it Window::Type_ModalChildWindowCard
+	// if we want to create a headless app, the type is WindowType::Type_None else it WindowType::Type_ModalChildWindowCard
 	if(true == isHeadless)
-		winType = Window::Type_None;
+		winType = WindowType::Type_None;
 
 	// launch the app
 	WebAppManager::instance()->onLaunchUrlChild(url.c_str(),

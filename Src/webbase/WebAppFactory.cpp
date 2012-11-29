@@ -26,7 +26,7 @@
 #include "Settings.h"
 #include "WebAppFactoryMinimal.h"
 #include "WebAppFactoryLuna.h"
-#include "Window.h"
+#include "WindowTypes.h"
 
 WebAppFactory* WebAppFactory::instance()
 {
@@ -54,30 +54,30 @@ WebAppFactory::~WebAppFactory()
 {    
 }
 
-QString WebAppFactory::nameForWindowType(Window::Type winType)
+QString WebAppFactory::nameForWindowType(WindowType::Type winType)
 {
     switch (winType) {
-	case Window::Type_StatusBar:
+    case WindowType::Type_StatusBar:
 		return "statusbar";
-	case Window::Type_ChildCard:
+    case WindowType::Type_ChildCard:
 		return "childcard";
-	case Window::Type_Card:
+    case WindowType::Type_Card:
 		return "card";
-	case Window::Type_Launcher:
+    case WindowType::Type_Launcher:
 		return "launcher";
-	case Window::Type_Dashboard:
+    case WindowType::Type_Dashboard:
 		return "dashboard";
-	case Window::Type_PopupAlert:
+    case WindowType::Type_PopupAlert:
 		return "popupalert";
-	case Window::Type_BannerAlert:
+    case WindowType::Type_BannerAlert:
 		return "menu";
-	case Window::Type_PIN:
+    case WindowType::Type_PIN:
 		return "pin";
-	case Window::Type_Emergency:
+    case WindowType::Type_Emergency:
 		return "emergency";
-	case Window::Type_None:
+    case WindowType::Type_None:
 		return "headless";
-	case Window::Type_ModalChildWindowCard:
+    case WindowType::Type_ModalChildWindowCard:
 		return "modalChildWindowCard";
 	default:
 		return "unknown";

@@ -26,6 +26,7 @@
 #include "Settings.h"
 #include "SysMgrWebBridge.h"
 #include "WebAppManager.h"
+#include "WindowTypes.h"
 #include <PIpcBuffer.h>
 #include <PIpcChannel.h>
 
@@ -35,7 +36,7 @@
 static int kMinHeight = 0;
 static const int kAlertActivityDuration = 10000;
 
-AlertWebApp::AlertWebApp(const QString& appId, int width, int height, Window::Type type, PIpcChannel *channel)
+AlertWebApp::AlertWebApp(const QString& appId, int width, int height, WindowType::Type type, PIpcChannel *channel)
 	: WindowedWebApp(0, 0, type,channel), m_isPowerdActivityRunning (false)
 {
 	setAppId(appId);

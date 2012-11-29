@@ -337,7 +337,7 @@ void SysMgrWebBridge::createViewForWindowlessPage()
     shell->setParent(this);
 
     WebAppManager* wam = WebAppManager::instance();
-    Window::Type winType = Window::Type_Card;
+    WindowType::Type winType = WindowType::Type_Card;
 
     shell->m_client = wam->launchWithPageInternal(shell, winType, m_client ? m_client->getAppDescription() : 0);
     if (!shell->m_client)
@@ -400,15 +400,15 @@ void SysMgrWebBridge::slotSetupPage(const QUrl& url)
     }
     WebAppManager* wam = WebAppManager::instance();
     if(windowType == "dashboard") {
-        wam->launchWithPageInternal(this, Window::Type_Dashboard, appDesc);
+        wam->launchWithPageInternal(this, WindowType::Type_Dashboard, appDesc);
     } else if(windowType == "banneralert") {
-        wam->launchWithPageInternal(this, Window::Type_BannerAlert, appDesc);
+        wam->launchWithPageInternal(this, WindowType::Type_BannerAlert, appDesc);
     } else if(windowType == "popupalert") {
-        wam->launchWithPageInternal(this, Window::Type_PopupAlert, appDesc);
+        wam->launchWithPageInternal(this, WindowType::Type_PopupAlert, appDesc);
     } else if(windowType == "menu") {
-        wam->launchWithPageInternal(this, Window::Type_Menu, appDesc);
+        wam->launchWithPageInternal(this, WindowType::Type_Menu, appDesc);
     } else if(windowType == "emergency") {
-        wam->launchWithPageInternal(this, Window::Type_Emergency, appDesc);
+        wam->launchWithPageInternal(this, WindowType::Type_Emergency, appDesc);
     } else if(windowType == "childcard") {
         // the identifier of the parent window should have been passed down to us through the
         // url query params
@@ -434,13 +434,13 @@ void SysMgrWebBridge::slotSetupPage(const QUrl& url)
 
         WebAppBase* app = wam->findApp(QString::fromStdString(launchingProcessId));
         if (app)
-            wam->launchWithPageInternal(this, Window::Type_ChildCard, appDesc);
+            wam->launchWithPageInternal(this, WindowType::Type_ChildCard, appDesc);
     } else if(windowType == "pin") {
-        wam->launchWithPageInternal(this, Window::Type_PIN, appDesc);
+        wam->launchWithPageInternal(this, WindowType::Type_PIN, appDesc);
     } else if(windowType == "dockmode") {
-        wam->launchWithPageInternal(this, Window::Type_DockModeWindow, appDesc);
+        wam->launchWithPageInternal(this, WindowType::Type_DockModeWindow, appDesc);
     } else if(windowType == "modalwindow") {
-        wam->launchWithPageInternal(this, Window::Type_ModalChildWindowCard, appDesc);
+        wam->launchWithPageInternal(this, WindowType::Type_ModalChildWindowCard, appDesc);
     } else { // card
         if(parent) {
             if(parent->m_launchedAtBoot) {
@@ -448,7 +448,7 @@ void SysMgrWebBridge::slotSetupPage(const QUrl& url)
                 this->deleteLater();
             }
             else
-                wam->launchWithPageInternal(this, Window::Type_Card, appDesc);
+                wam->launchWithPageInternal(this, WindowType::Type_Card, appDesc);
         }
     }
     // set app id

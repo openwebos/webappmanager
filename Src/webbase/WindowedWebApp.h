@@ -31,7 +31,8 @@
 #include "sptr.h"
 #include "Event.h"
 #include "Timer.h"
-#include "Window.h"
+#include "WindowProperties.h"
+#include "WindowTypes.h"
 #include <PIpcChannelListener.h>
 #include <PIpcBuffer.h>
 #include <QRect>
@@ -48,7 +49,7 @@ class WindowedWebApp : public WebAppBase , public PIpcChannelListener
     Q_OBJECT
 public:
 
-	WindowedWebApp(int width, int height, Window::Type type, PIpcChannel *channel = 0);
+    WindowedWebApp(int width, int height, WindowType::Type type, PIpcChannel *channel = 0);
 	virtual ~WindowedWebApp();
 
 	virtual void attach(SysMgrWebBridge* page);
@@ -67,7 +68,7 @@ public:
 	virtual bool isDashboardApp() const { return false; }
     virtual bool isLeafApp() const { return true; }
 
-	virtual Window::Type windowType() const { return m_winType; };
+    virtual WindowType::Type windowType() const { return m_winType; };
 
 	virtual void setOrientation(Event::Orientation orient) {}
 
@@ -162,7 +163,7 @@ protected:
 	PIpcBuffer* m_metaDataBuffer;
 	WindowMetaData* m_metaData;
 
-	Window::Type		m_winType;
+    WindowType::Type	m_winType;
 	int					m_width;
 	int					m_height;
 	bool                m_beingDeleted;

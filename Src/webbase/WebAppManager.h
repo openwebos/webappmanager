@@ -36,7 +36,8 @@
 #include "MemoryWatcher.h"
 #include "SignalSlot.h"
 #include "Timer.h"
-#include "Window.h"
+#include "WindowTypes.h"
+#include "WindowProperties.h"
 #include "WebAppCache.h"
 #include "HostBase.h"
 #include "lunaservice.h"
@@ -55,14 +56,17 @@ class PalmClipboard;
 class SharedGlobalProperties;
 class SysMgrKeyEvent;
 class SysMgrWebBridge;
+class ApplicationDescription;
 
 #define WEB_APP_MGR_IPC_NAME "WebAppManager"
 
-class WebAppManager : public SyncTask
+class WebAppManager : public QObject
+                    , public SyncTask
 					, public Trackable
 					, public PIpcClient
 					, public PIpcChannelListener
 {
+    Q_OBJECT
 public:
 
 	static WebAppManager* instance();
@@ -76,7 +80,7 @@ public:
 	Event::Orientation orientation() const;
 
 	std::list<const ProcessBase*>	runningApps() ;
-	std::list<const ProcessBase*>	runningApps(Window::Type winType);
+    std::list<const ProcessBase*>	runningApps(WindowType::Type winType);
 	WebAppBase* findApp(const QString& processId);
 	WebAppBase* findAppById(const QString& appId);
 
@@ -180,11 +184,11 @@ private:
 
 	static bool systemServiceConnectCallback(LSHandle *sh, LSMessage *message, void *ctx);
 	static bool activityManagerCallback(LSHandle* sh, LSMessage* message, void* ctx);
-	WebAppBase* launchUrlInternal(const std::string& url, Window::Type winType,
+    WebAppBase* launchUrlInternal(const std::string& url, WindowType::Type winType,
 								  const std::string& appDesc, const std::string& procId,
 								  const std::string& args, const std::string& launchingAppId,
 								  const std::string& launchingProcId, int& errorCode, bool launchAsChild, bool ignoreLowMemory=false);
-	WebAppBase* launchWithPageInternal(SysMgrWebBridge* page, Window::Type winType, ApplicationDescription* parentDesc);
+    WebAppBase* launchWithPageInternal(SysMgrWebBridge* page, WindowType::Type winType, ApplicationDescription* parentDesc);
 	void closeAppInternal(WebAppBase* app);
 	void setOrientationInternal(Event::Orientation orient);
 
@@ -198,13 +202,14 @@ private:
     void launchIme();
 	void launchImePopup(const std::string&);
 
-	bool preventAppUnderLowMemory(const std::string& appId, Window::Type winType, ApplicationDescription* appDesc) const;
+    bool preventAppUnderLowMemory(const std::string& appId, WindowType::Type winType, ApplicationDescription* appDesc) const;
 
 	static bool sysServicePrefsCallback(LSHandle *lshandle, LSMessage *message, void *ctx);
 	static bool displayManagerConnectCallback(LSHandle* sh, LSMessage* message, void* ctx);
 	static bool displayManagerCallback(LSHandle* sh, LSMessage* message, void* ctx);	
 
 	void slotMemoryStateChanged(MemoryWatcher::MemState state);
+    Q_INVOKABLE void localeChanged();
 
 	static gboolean deletePagesCallback(gpointer arg);
 	void deletePages();
@@ -248,7 +253,6 @@ private:
 	LSPalmService* m_service;
 	LSHandle* m_servicePublic;
 	LSHandle* m_servicePrivate;
-	WebAppBase* m_imePopupApp;
 	WebKitEventListener* m_wkEventListener;
 	PageList m_pagesToDeleteList;
 	bool m_deletingPages;
@@ -273,7 +277,7 @@ private:
 
     std::string m_activeAppId;
 
-	friend class SysMgrWebBridge;
+    friend class SysMgrWebBridge;
 	friend class SysMgrWebPage;
 	friend class WebAppBase;
 	friend class WindowedWebApp;
@@ -282,7 +286,7 @@ private:
 	friend class CardWebApp;
 	friend class AlertWebApp;
 	friend class DashboardWebApp;
-	friend class ProcessManager;
+    friend class ProcessManager;
 };
 
 #endif /* BROWSERAPPMANAGER_H */

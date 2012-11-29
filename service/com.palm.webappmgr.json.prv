@@ -1,0 +1,24 @@
+{
+    "role": {
+        "exeName":"/usr/bin/WebAppMgr",
+        "type": "regular",
+        "allowedNames": ["", "com.palm.lunastats", "com.palm.appDataBackup", "com.palm.eventreporter.WebAppMgr", "com.palm.luna-*"]
+    },
+    "permissions": [
+        {
+            "service":"com.palm.lunastats",
+            "inbound":["*"],
+            "outbound":["*"]
+        },
+        {
+            "service":"com.palm.appDataBackup",
+            "inbound":["*"],
+            "outbound":["*"]
+        },
+        {
+            "service":"com.palm.eventreporter.WebAppMgr",
+            "inbound":["*"],
+            "outbound":["*"]
+        }
+    ]
+}

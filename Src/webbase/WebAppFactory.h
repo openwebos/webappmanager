@@ -26,8 +26,9 @@
 
 #include <QString>
 
-#include "Window.h"
+#include "WindowTypes.h"
 
+class ApplicationDescription;
 class WebAppBase;
 class SysMgrWebBridge;
 class PIpcChannel;
@@ -38,11 +39,11 @@ public:
 
 	static WebAppFactory* instance();
 
-	virtual WebAppBase* createWebApp(Window::Type winType, PIpcChannel* channel, ApplicationDescription* desc = 0) = 0;
-	virtual WebAppBase* createWebApp(Window::Type winType, SysMgrWebBridge* page, PIpcChannel* channel, ApplicationDescription* desc = 0) = 0;
-	virtual WebAppBase* createWebApp(Window::Type winType, int width, int height, PIpcChannel* channel, ApplicationDescription* desc = 0) = 0;
+    virtual WebAppBase* createWebApp(WindowType::Type winType, PIpcChannel* channel, ApplicationDescription* desc = 0) = 0;
+    virtual WebAppBase* createWebApp(WindowType::Type winType, SysMgrWebBridge* page, PIpcChannel* channel, ApplicationDescription* desc = 0) = 0;
+    virtual WebAppBase* createWebApp(WindowType::Type winType, int width, int height, PIpcChannel* channel, ApplicationDescription* desc = 0) = 0;
 
-	static QString nameForWindowType(Window::Type winType);
+    static QString nameForWindowType(WindowType::Type winType);
 
 protected:
 

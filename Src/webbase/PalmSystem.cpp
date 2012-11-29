@@ -8,7 +8,7 @@
 #include "KeyboardMapping.h"
 #include "Localization.h"
 #include "NewContentIndicatorEventFactory.h"
-#include "Preferences.h"
+#include "LocalePreferences.h"
 #include "Settings.h"
 #include "SysMgrWebBridge.h"
 #include "WebAppBase.h"
@@ -993,17 +993,17 @@ bool PalmSystem::hasAlphaHole() const
 
 QString PalmSystem::locale() const
 {
-    return QString::fromStdString(Preferences::instance()->locale());
+    return QString::fromStdString(LocalePreferences::instance()->locale());
 }
 
 QString PalmSystem::localeRegion() const
 {
-    return QString::fromStdString(Preferences::instance()->localeRegion());
+    return QString::fromStdString(LocalePreferences::instance()->localeRegion());
 }
 
 QString PalmSystem::timeFormat() const
 {
-    return QString::fromStdString(Preferences::instance()->timeFormat());
+    return QString::fromStdString(LocalePreferences::instance()->timeFormat());
 }
 
 QString PalmSystem::timeZone() const
@@ -1095,7 +1095,7 @@ int PalmSystem::activityId() const
 
 QString PalmSystem::phoneRegion() const
 {
-    return QString::fromStdString(Preferences::instance()->phoneRegion());
+    return QString::fromStdString(LocalePreferences::instance()->phoneRegion());
 }
 
 // write properties

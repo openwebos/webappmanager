@@ -27,10 +27,8 @@
 #include <PIpcChannel.h>
 
 #include "Debug.h"
-#include "EventThrottler.h"
 #include "EventReporter.h"
 #include "Logging.h"
-#include "Preferences.h"
 #include "WebAppFactory.h"
 #include "WindowedWebApp.h"
 #include "SysMgrWebBridge.h"
@@ -41,7 +39,6 @@
 #include "WebAppManager.h"
 #include "WebKitKeyMap.h"
 #include "WindowMetaData.h"
-#include "DeviceInfo.h"
 
 #include <QDebug>
 
@@ -56,7 +53,7 @@ static const int s_recordedGestureAvgWeights[] = { 1, 2, 4, 8, 16 };
 
 //#define DEBUG_WEBAPP_INPUT_EVENTS 1
 
-WindowedWebApp::WindowedWebApp(int width, int height, Window::Type type, PIpcChannel *channel)
+WindowedWebApp::WindowedWebApp(int width, int height, WindowType::Type type, PIpcChannel *channel)
 	: m_data(0)
 	, m_metaDataBuffer(0)
 	, m_metaData(0)
@@ -85,7 +82,7 @@ WindowedWebApp::WindowedWebApp(int width, int height, Window::Type type, PIpcCha
 	m_windowWidth = width;
 	m_windowHeight = height;
 
-	if (type == Window::Type_Launcher) {
+    if (type == WindowType::Type_Launcher) {
 		m_windowHeight -= Settings::LunaSettings()->positiveSpaceTopPadding;
 	}
 	
@@ -99,7 +96,7 @@ WindowedWebApp::~WindowedWebApp()
 
 	stopPaintTimer();
 
-	if (m_winType != Window::Type_ChildCard) {
+    if (m_winType != WindowType::Type_ChildCard) {
 		if(m_data) {
 			m_channel->sendAsyncMessage(new ViewHost_RemoveWindow(routingId()));
 			WebAppManager::instance()->windowedAppRemoved(this);
@@ -126,7 +123,7 @@ void WindowedWebApp::init()
 
 	m_data->setWindowMetaDataBuffer(m_metaDataBuffer);
 
-	m_data->setSupportsDirectRendering(m_winType == Window::Type_Card);
+    m_data->setSupportsDirectRendering(m_winType == WindowType::Type_Card);
 }
 
 void WindowedWebApp::closeWindowRequest() 
@@ -161,7 +158,7 @@ void WindowedWebApp::attach(SysMgrWebBridge* page)
 
     page->page()->setViewportSize(QSize(m_windowWidth, m_windowHeight));
 
-	if (m_winType != Window::Type_ChildCard) {
+    if (m_winType != WindowType::Type_ChildCard) {
 
 		// wait until progress = 100 before actually adding the window.
 		// We do the prepare add window here since we don't have the appid
@@ -180,8 +177,8 @@ void WindowedWebApp::attach(SysMgrWebBridge* page)
 		}
 	}
 	
-	if( m_winType == Window::Type_ChildCard ||
-		m_winType == Window::Type_Card) {
+    if( m_winType == WindowType::Type_ChildCard ||
+        m_winType == WindowType::Type_Card) {
 		EventReporter::instance()->report( "launch", static_cast<ProcessBase*>(page)->appId().toUtf8().constData() );
 	}
 
@@ -1066,7 +1063,7 @@ void WindowedWebApp::loadFinished()
 		m_pendingFocus = PendingFocusNone;
 	}
 	
-	if (!m_addedToWindowMgr && m_winType != Window::Type_ChildCard) {
+    if (!m_addedToWindowMgr && m_winType != WindowType::Type_ChildCard) {
 		qDebug() << __PRETTY_FUNCTION__ << ":" << __LINE__ << "Adding to windowManager: " << (page() ? page()->url() : QUrl());
         paint();
 
@@ -1153,7 +1150,7 @@ void WindowedWebApp::stageReady()
 	m_stageReady = true;
 	page()->setStageReadyPending(false);
 	
-	if (!m_addedToWindowMgr && m_winType != Window::Type_ChildCard) {
+    if (!m_addedToWindowMgr && m_winType != WindowType::Type_ChildCard) {
 
         qDebug() << __PRETTY_FUNCTION__ << ":" << __LINE__ << "Adding to windowManager:" << (page() ? (page()->url()) : QUrl());
         paint();
@@ -1228,7 +1225,7 @@ void WindowedWebApp::needTouchEvents(bool needTouchEvents)
 bool WindowedWebApp::showWindowTimeout()
 {
 	qWarning() << __PRETTY_FUNCTION__ << ": timed out in waiting for stageReady: " << (page() ? (page()->url()) : QUrl());
-	if (!m_addedToWindowMgr && m_winType != Window::Type_ChildCard) {
+    if (!m_addedToWindowMgr && m_winType != WindowType::Type_ChildCard) {
         paint();
 
 	 	m_channel->sendAsyncMessage(new ViewHost_AddWindow(routingId()));
@@ -1407,7 +1404,7 @@ void WindowedWebApp::keyGesture(QKeyEvent* e)
 
 bool WindowedWebApp::isTransparent() const
 {
-	return ((m_winType == Window::Type_Menu) ||
-			(m_winType == Window::Type_Dashboard) ||
-            (m_winType == Window::Type_PopupAlert));
+    return ((m_winType == WindowType::Type_Menu) ||
+            (m_winType == WindowType::Type_Dashboard) ||
+            (m_winType == WindowType::Type_PopupAlert));
 }

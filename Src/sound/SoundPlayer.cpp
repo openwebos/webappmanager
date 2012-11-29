@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <sys/prctl.h>
 
-#include "DisplayManager.h"
 #include "HostBase.h"
 #include "SoundPlayerPool.h"
 #include "Utils.h"

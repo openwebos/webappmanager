@@ -21,10 +21,8 @@
 #include "Common.h"
 
 #include "CardWebApp.h"
-#include "EventThrottler.h"
 #include "Logging.h"
 #include "RemoteWindowData.h"
-#include "RoundedCorners.h"
 #include "Settings.h"
 #include "Utils.h"
 #include "WebAppCache.h"
@@ -32,7 +30,7 @@
 #include "WebAppManager.h"
 #include "WebAppFactory.h"
 #include "SysMgrWebBridge.h"
-#include "Window.h"
+#include "WindowTypes.h"
 #include "WindowMetaData.h"
 #include "Time.h"
 #include "EventReporter.h"
@@ -150,7 +148,7 @@ bool CardWebApp::event(QEvent* event)
 #endif
 
 
-CardWebApp::CardWebApp(Window::Type winType, PIpcChannel *channel, ApplicationDescription* desc)
+CardWebApp::CardWebApp(WindowType::Type winType, PIpcChannel *channel, ApplicationDescription* desc)
 	: WindowedWebApp(0, 0, winType, channel)
 	, m_parentWebApp(0)
 	, m_childWebApp(0)
@@ -206,7 +204,7 @@ CardWebApp::CardWebApp(Window::Type winType, PIpcChannel *channel, ApplicationDe
 	int widthAdj = 0;
 	int heightAdj = Settings::LunaSettings()->positiveSpaceTopPadding;
 
-    if(winType == Window::Type_ModalChildWindowCard) {
+    if(winType == WindowType::Type_ModalChildWindowCard) {
         heightAdj = 0;
         m_width = Settings::LunaSettings()->modalWindowWidth;
         m_height = Settings::LunaSettings()->modalWindowHeight;
@@ -228,8 +226,8 @@ CardWebApp::CardWebApp(Window::Type winType, PIpcChannel *channel, ApplicationDe
 
 	// --------------------------------------------------------------------------
 
-	if (winType == Window::Type_Card || winType == Window::Type_PIN || 
-        winType == Window::Type_Emergency || winType == Window::Type_ModalChildWindowCard) {
+    if (winType == WindowType::Type_Card || winType == WindowType::Type_PIN ||
+        winType == WindowType::Type_Emergency || winType == WindowType::Type_ModalChildWindowCard) {
 		
 		init();
 
@@ -238,7 +236,7 @@ CardWebApp::CardWebApp(Window::Type winType, PIpcChannel *channel, ApplicationDe
 	}
 
 	// for child windows the setup will be done in the attach page call
-	if (winType == Window::Type_Card || winType == Window::Type_ChildCard)
+    if (winType == WindowType::Type_Card || winType == WindowType::Type_ChildCard)
 		WebAppDeferredUpdateHandler::registerApp(this);
 
     QGraphicsScene* scene = new QGraphicsScene(0, 0, m_width, m_height);
@@ -285,12 +283,12 @@ CardWebApp::~CardWebApp()
 	if (m_parentWebApp)
 		m_parentWebApp->removeChildCardWebApp(this);
 
-	if (m_winType == Window::Type_ChildCard) {
+    if (m_winType == WindowType::Type_ChildCard) {
 		m_data = 0;
 		m_metaDataBuffer = 0;
 	}
 
-	if (m_winType == Window::Type_Card || m_winType == Window::Type_ChildCard)
+    if (m_winType == WindowType::Type_Card || m_winType == WindowType::Type_ChildCard)
 		WebAppDeferredUpdateHandler::unregisterApp(this);
 }
 
@@ -680,7 +678,7 @@ int CardWebApp::resizeEvent(int newWidth, int newHeight, bool resizeBuffer)
 		goto Done;
 
 	// We allow window resize only in UP orientation mode (Except for Dock Mode Windows)
-	if ((m_orientation != Event::Orientation_Up) && (m_winType != Window::Type_DockModeWindow))
+    if ((m_orientation != Event::Orientation_Up) && (m_winType != WindowType::Type_DockModeWindow))
 		goto Done;
 
 	if ((int) m_windowWidth == newWidth &&
@@ -729,12 +727,12 @@ int CardWebApp::resizeEvent(int newWidth, int newHeight, bool resizeBuffer)
 			m_windowWidth = m_width;
 		}
 
-        if (Window::Type_ModalChildWindowCard == WindowedWebApp::windowType())
+        if (WindowType::Type_ModalChildWindowCard == WindowedWebApp::windowType())
             resizeWebPage(m_width, newHeight);
         else
             resizeWebPage(m_windowWidth, m_windowHeight);
 
-        if (Window::Type_ModalChildWindowCard != WindowedWebApp::windowType())
+        if (WindowType::Type_ModalChildWindowCard != WindowedWebApp::windowType())
             setVisibleDimensions(m_width, m_height - (m_enableFullScreen ? 0 : Settings::LunaSettings()->positiveSpaceTopPadding));
 		else
 			setVisibleDimensions(m_width, newHeight);
@@ -775,7 +773,7 @@ void CardWebApp::flipEvent(int newWidth, int newHeight)
 	m_pendingResizeHeight = -1;
 
 	m_windowWidth = m_width;
-	if(m_winType == Window::Type_ModalChildWindowCard) {
+    if(m_winType == WindowType::Type_ModalChildWindowCard) {
 		m_windowHeight = newHeight;
 	}
 	else {
@@ -815,7 +813,7 @@ void CardWebApp::asyncFlipEvent(int newWidth, int newHeight, int newScreenWidth,
 	m_appBufHeight = m_height;
 
 	m_windowWidth = m_width;
-	if (m_winType == Window::Window::Type_ModalChildWindowCard ){
+    if (m_winType == WindowType::Type_ModalChildWindowCard ){
 		m_windowHeight = newHeight;
 	}
 	else {
@@ -1211,7 +1209,7 @@ void CardWebApp::setParentCardWebApp(CardWebApp* app)
 
 void CardWebApp::attach(SysMgrWebBridge* page)
 {
-	if (m_winType == Window::Type_ChildCard) {
+    if (m_winType == WindowType::Type_ChildCard) {
 
 		// this is a child card
 
@@ -1245,7 +1243,7 @@ void CardWebApp::attach(SysMgrWebBridge* page)
 		}
 	}
 
-	if (m_winType == Window::Type_Card || m_winType == Window::Type_ModalChildWindowCard) {
+    if (m_winType == WindowType::Type_Card || m_winType == WindowType::Type_ModalChildWindowCard) {
 
 		AppLaunchOptionsEvent ops_ev;
 
@@ -1280,7 +1278,7 @@ void CardWebApp::attach(SysMgrWebBridge* page)
 		    }
 		}
 	}
-	if(m_winType != Window::Type_ModalChildWindowCard)
+    if(m_winType != WindowType::Type_ModalChildWindowCard)
 		setVisibleDimensions(m_width, m_height - Settings::LunaSettings()->positiveSpaceTopPadding);
 	else
 		setVisibleDimensions(m_width, m_height);
@@ -1296,12 +1294,12 @@ SysMgrWebBridge* CardWebApp::detach()
 
 bool CardWebApp::isWindowed() const
 {
-    return m_winType != Window::Type_ChildCard;
+    return m_winType != WindowType::Type_ChildCard;
 }
 
 bool CardWebApp::isChildApp() const
 {
-	return m_winType == Window::Type_ChildCard;
+    return m_winType == WindowType::Type_ChildCard;
 }
 
 bool CardWebApp::isLeafApp() const
@@ -1311,12 +1309,12 @@ bool CardWebApp::isLeafApp() const
 
 void CardWebApp::loadFinished()
 {
-	if (m_winType != Window::Type_Card) {
+    if (m_winType != WindowType::Type_Card) {
 		WindowedWebApp::loadFinished();
 	}
 
 	// fake this
-	if (m_winType == Window::Type_ChildCard) {
+    if (m_winType == WindowType::Type_ChildCard) {
 		m_addedToWindowMgr = true;
 	}
 }
@@ -1345,7 +1343,7 @@ void CardWebApp::handlePendingChanges()
 		}
 	}
 
-    if (m_pendingFullScreenMode != -1 && WindowedWebApp::windowType() != Window::Type_DockModeWindow) {
+    if (m_pendingFullScreenMode != -1 && WindowedWebApp::windowType() != WindowType::Type_DockModeWindow) {
         if (m_enableFullScreen == m_pendingFullScreenMode) {
 			//Requesting we switch to a state we're already in.  This means
 			//there's nothing to do and we should suppress the processing
@@ -1828,7 +1826,7 @@ void CardWebApp::thawFromCache()
 		return;
 	}
 
-	if (m_winType == Window::Type_Card || m_winType == Window::Type_ChildCard)
+    if (m_winType == WindowType::Type_Card || m_winType == WindowType::Type_ChildCard)
 		WebAppDeferredUpdateHandler::registerApp(this);
 
 	// Resume all timers in the app before we do the rest of the thawing work
@@ -1875,7 +1873,7 @@ void CardWebApp::freezeInCache()
 
     qDebug("CACHING app %s", page()->appId().toStdString().c_str());
 
-	if (m_winType == Window::Type_Card || m_winType == Window::Type_ChildCard)
+    if (m_winType == WindowType::Type_Card || m_winType == WindowType::Type_ChildCard)
 		WebAppDeferredUpdateHandler::unregisterApp(this);
 
 	if (m_data)
@@ -1922,7 +1920,7 @@ void CardWebApp::resumeAppRendering()
 }
 
 void CardWebApp::screenSize(int& width, int& height) {
-	if(m_winType == Window::Type_ModalChildWindowCard){
+    if(m_winType == WindowType::Type_ModalChildWindowCard){
 		width = Settings::LunaSettings()->modalWindowWidth;
 		height = Settings::LunaSettings()->modalWindowHeight;
 	}

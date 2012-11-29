@@ -23,24 +23,10 @@
 
 #include "HostBase.h"
 #include "ApplicationDescription.h"
-#include "ApplicationManager.h"
-#include "BootupAnimation.h"
-#include "CpuAffinity.h"
 //MDK-LAUNCHER #include "DockPositionManager.h"
-#include "HapticsController.h"
-#include "IpcServer.h"
 #include "Localization.h"
-#include "WindowServer.h"
 #include "WebAppManager.h"
-#include "WebAppMgrProxy.h"
-#include "MemoryMonitor.h"
 #include "Settings.h"
-#include "SystemService.h"
-#include "ApplicationInstaller.h"
-#include "Preferences.h"
-#include "DeviceInfo.h"
-#include "Security.h"
-#include "EASPolicyManager.h"
 #include "Logging.h"
 
 #include <sys/time.h>
@@ -107,7 +93,7 @@ pid_t sysmgrPid;
 
 pid_t bootAnimPid;
 int   bootAnimPipeFd=-1, sysmgrPipeFd=-1;
-int   WebAppMgrPipeFd=-1, IpcServerPipeFd=-1;
+int   WebAppMgrPipeFd=-1;
 char  msgOkToContinue = 0xAB;
 
 // Safe printf that does not call malloc (to avoid re-entrancy issue when
@@ -495,129 +481,10 @@ static void generateGoodBacktraceTerminateHandler()
 	exit(-1);
 }
 
-static int RunWebAppManagerTask(void* data)
-{
-    // Install the handler for signals that we want to trap:
-    // Note: We install the handlers after we initialize the setting because
-    // we may do something different depending on the settings values.
-    installOuterCrashHandler(SIGILL);
-    installOuterCrashHandler(SIGSEGV);
-    installOuterCrashHandler(SIGTERM);
-
-	::prctl(PR_SET_NAME, (unsigned long) "WebAppMgr", 0, 0, 0);
-	::prctl(PR_SET_PDEATHSIG, SIGKILL, 0, 0, 0);
-
-
-	char msg = 0x00;
-	int len = 0;
-
-	// block here until the IpcServer in the main process is ready
-	while (len != 1 || msg != msgOkToContinue)
-		len = ::read(IpcServerPipeFd, &msg, 1);
-
-	::close(IpcServerPipeFd);
-	IpcServerPipeFd = -1;
-
-	const HostInfo* info = &(HostBase::instance()->getInfo());
-	WebAppManager::instance()->setHostInfo(info);
-
-	initMallocStatsCb(WebAppManager::instance()->mainLoop(), s_mallocStatsInterval);
-
-	logInit();
-
-	// Start the Browser App Launcher
-#ifdef NO_WEBKIT_INIT
-	WindowServer::instance()->bootupFinished();
-#else
-	WebAppManager::instance()->run(); // Sync execution of the task
-#endif
-
-	return 0;
-}
 
 
 int appArgc = 0;
 char** appArgv = 0;
-
-static int RunBootupAnimationTask(void* data)
-{
-	::prctl(PR_SET_NAME, (unsigned long) "BootupAnimation", 0, 0, 0);
-	::prctl(PR_SET_PDEATHSIG, SIGKILL, 0, 0, 0);
-
-	// Set "nice" property
-	setpriority(PRIO_PROCESS,getpid(),1);
-
-	const HostInfo* info = &(HostBase::instance()->getInfo());
-	QCoreApplication bootApp(appArgc, appArgv);
-
-//	BootupAnimation* bootAnim = new BootupAnimation(sysmgrPipeFd);
-	//bootAnim->setFont(QFont("Prelude", 12));
-
-	//bootAnim->resize(info->displayWidth,info->displayHeight);
-	//bootAnim->show();
-	//bootAnim->start();
-
-	bootApp.exec();
-
-	return 0;
-}
-
-pid_t spawnWebKitProcess()
-{
-	int fd[2];
-	::pipe(fd);
-
-	pid_t pid = ::fork();
-	if (pid < 0)
-		return pid;
-
-
-	if (pid == 0) {
-		// child closed the WRITE end of the pipe
-		::close(fd[1]);
-		IpcServerPipeFd = fd[0];
-		RunWebAppManagerTask((void*) 0);
-		exit(-1);
-	} else {
-		// parent closes the READ end of the pipe
-		::close(fd[0]);
-		WebAppMgrPipeFd = fd[1];
-	}
-
-	return pid;
-}
-
-pid_t spawnBootupAnimationProcess()
-{
-	int fd[2];
-	::pipe(fd);
-
-	pid_t pid = ::fork();
-	if (pid < 0) {
-		return pid;
-	}
-
-	if (pid == 0) {
-		// child closed the WRITE end of the pipe
-		::close(fd[1]);
-		sysmgrPipeFd = fd[0];
-		RunBootupAnimationTask((void*) 0);
-		exit(-1);
-	} else {
-		bootAnimPid = pid;
-		// parent closed the READ end of the pipe
-		::close(fd[0]);
-		bootAnimPipeFd = fd[1];
-	}
-
-	return pid;
-}
-
-gboolean finishBootup(gpointer data)
-{
-    WindowServer::instance()->bootupFinished();
-    return FALSE;
-}
 
 int main( int argc, char** argv)
 {
@@ -640,8 +507,6 @@ int main( int argc, char** argv)
 #else
 	renderMode = "Software";
 #endif
-
-	WindowServer::markBootStart();
 
 	g_debug("SysMgr compiled against Qt %s, running on %s, %s render mode requested", QT_VERSION_STR, qVersion(), renderMode);
 
@@ -679,13 +544,6 @@ int main( int argc, char** argv)
 	// resolution may get picked up from the fb driver on arm
 	host->init(settings->displayWidth, settings->displayHeight);
 
-#if defined(TARGET_DEVICE)
-	pid_t animPid= spawnBootupAnimationProcess();
-	if(animPid < 0) { // failed to start the Animation process
-		return -1;
-	}
-#endif
-
 #if defined(TARGET_DEVICE) && defined(HAVE_OPENGL)
 	if (settings->forceSoftwareRendering)
 		::setenv("QT_QPA_PLATFORM", "palm-soft", 1);
@@ -702,85 +560,30 @@ int main( int argc, char** argv)
 		::setenv("QWS_DISPLAY", "egl", 1);
 #endif
 
+    // Install the handler for signals that we want to trap:
+    // Note: We install the handlers after we initialize the setting because
+    // we may do something different depending on the settings values.
+    installOuterCrashHandler(SIGILL);
+    installOuterCrashHandler(SIGSEGV);
+    installOuterCrashHandler(SIGTERM);
 
-	pid_t webKitPid= spawnWebKitProcess();
-	if(webKitPid < 0) { // failed to start the WebKit process
-		return -1;
-	}
+    // Not needed anymore?
+    ::prctl(PR_SET_NAME, (unsigned long) "WebAppMgr", 0, 0, 0);
+    ::prctl(PR_SET_PDEATHSIG, SIGKILL, 0, 0, 0);
 
-	// Tie LunaSysMgr to Processor 0
-	setCpuAffinity(getpid(), 1);
+    const HostInfo* info = &(HostBase::instance()->getInfo());
+    WebAppManager::instance()->setHostInfo(info);
 
-	// Tie WebAppMgr to Processor 1
-	setCpuAffinity(webKitPid, 0);
+    initMallocStatsCb(WebAppManager::instance()->mainLoop(), s_mallocStatsInterval);
 
-	// Safe to create logging threads now
-	logInit();
+    logInit();
 
-	// Initialize Ipc Server
-	(void) IpcServer::instance();
+    // Start the Browser App Launcher
+    #ifdef NO_WEBKIT_INIT
+        //WindowServer::instance()->bootupFinished();
+    #else
+        WebAppManager::instance()->run(); // Sync execution of the task
+    #endif
 
-	// Ipc Server is ready, so signal the WebAppMgr process (via pipe) to go ahead and connect
-	::write(WebAppMgrPipeFd, &msgOkToContinue, 1);
-	::close(WebAppMgrPipeFd);
-	WebAppMgrPipeFd = -1;
-
-
-#if !defined(TARGET_DESKTOP)
-	// Set "nice" property
-	setpriority(PRIO_PROCESS,getpid(),-1);
-#endif
-
-	qInstallMsgHandler(qtMsgHandler);
-	QApplication app(argc, argv);
-	QApplication::setStartDragDistance(settings->tapRadius);
-	QApplication::setDoubleClickInterval (Settings::LunaSettings()->tapDoubleClickDuration);
-	host->show();
-	
-	initMallocStatsCb(HostBase::instance()->mainLoop(), s_mallocStatsInterval);
-
-	// Initialize Preferences handler
-	(void) Preferences::instance();
-
-	// Initialize Localization handler
-	(void) Localization::instance();
-
-	//Register vibration/haptics support
-	HapticsController::instance()->startService();
-
-	(void) DeviceInfo::instance();
-
-	// Initialize Security handler
-	(void) Security::instance();
-
-	// Initialize the System Service
-	SystemService::instance()->init();
-
-	// Initialize the application mgr
-	ApplicationManager::instance()->init();
-
-	// Initialize the Application Installer
-	ApplicationInstaller::instance();
-
-	// Start the window manager
-	WindowServer *windowServer = WindowServer::instance();
-	windowServer->installEventFilter(windowServer);
-
-	// Initialize the SysMgr MemoryMonitor
-	MemoryMonitor::instance();
-
-	// load all set policies
-	EASPolicyManager::instance()->load();
-
-	// Launching of the System UI launcher and headless apps has been moved to WebAppMgrProxy::connectWebAppMgr
-
-	// Did user specify an app to launch
-	if (s_appToLaunchStr) {
-		WebAppMgrProxy::setAppToLaunchUponConnection(s_appToLaunchStr);
-	}
-	else
-	    g_timeout_add(0, finishBootup, 0);
-	
-	app.exec();
-	return 0;
+    return 0;
 }

@@ -26,7 +26,6 @@
 #include <algorithm>
 #include <PIpcBuffer.h>
 #include <PIpcChannel.h>
-#include "IpcClientHost.h"
 #include "WebAppManager.h"
 
 #define MESSAGES_INTERNAL_FILE "SysMgrMessagesInternal.h"
@@ -41,7 +40,7 @@ static bool stringIsTrue(std::string s)
 }
 
 DashboardWebApp::DashboardWebApp(PIpcChannel *channel)
-	: WindowedWebApp(0, 0, Window::Type_Dashboard, channel)
+    : WindowedWebApp(0, 0, WindowType::Type_Dashboard, channel)
 {
 	m_width = WebAppManager::instance()->currentUiWidth();
 	m_height = kDashboardWindowHeight;

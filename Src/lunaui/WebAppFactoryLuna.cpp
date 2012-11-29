@@ -41,46 +41,46 @@ WebAppFactoryLuna::WebAppFactoryLuna()
 	m_dashboardOwnsNegativeSpace = (Settings::LunaSettings()->virtualKeyboardEnabled ? false : (Settings::LunaSettings()->showNotificationsAtTop ? false : true));
 }
 
-WebAppBase* WebAppFactoryLuna::createWebApp(Window::Type winType, PIpcChannel* channel, ApplicationDescription* desc)
+WebAppBase* WebAppFactoryLuna::createWebApp(WindowType::Type winType, PIpcChannel* channel, ApplicationDescription* desc)
 {
 	WebAppBase* app = 0;
 	
 	switch (winType) {
-	case (Window::Type_Card):
-	case (Window::Type_ChildCard):
-	case (Window::Type_PIN):
-	case (Window::Type_Emergency):
-	case (Window::Type_ModalChildWindowCard):
+    case (WindowType::Type_Card):
+    case (WindowType::Type_ChildCard):
+    case (WindowType::Type_PIN):
+    case (WindowType::Type_Emergency):
+    case (WindowType::Type_ModalChildWindowCard):
 		app = new CardWebApp(winType, channel, desc);
 		break;
-	case (Window::Type_DockModeWindow):
+    case (WindowType::Type_DockModeWindow):
 		app = new DockWebApp(winType, channel);
 		break;
-	case (Window::Type_Dashboard):
+    case (WindowType::Type_Dashboard):
 		app = new DashboardWebApp(channel);
 		break;
-	case (Window::Type_Menu): {
+    case (WindowType::Type_Menu): {
 		app = new WindowedWebApp(WebAppManager::instance()->currentUiWidth(),
 								 WebAppManager::instance()->currentUiHeight() -
 								 Settings::LunaSettings()->positiveSpaceTopPadding,
 								 winType, channel);
 		break;
 	}
-	case (Window::Type_Overlay):
-	case (Window::Type_Launcher):
+    case (WindowType::Type_Overlay):
+    case (WindowType::Type_Launcher):
 		app = new WindowedWebApp(WebAppManager::instance()->currentUiWidth(),
 				                 WebAppManager::instance()->currentUiHeight(),
 								 winType, channel);
 		break;
-	case (Window::Type_StatusBar):
+    case (WindowType::Type_StatusBar):
 		app = new WindowedWebApp(WebAppManager::instance()->currentUiWidth(),
 								 Settings::LunaSettings()->positiveSpaceTopPadding,
 								 winType, channel);
 		break;
-	case (Window::Type_None):
+    case (WindowType::Type_None):
 		app = new WebAppBase();
 		break;
-	case (Window::Type_PopupAlert):
+    case (WindowType::Type_PopupAlert):
 		app = new AlertWebApp(QString(), -1, -1, winType, channel);
 		break;
 	default:
@@ -91,26 +91,26 @@ WebAppBase* WebAppFactoryLuna::createWebApp(Window::Type winType, PIpcChannel* c
 	return app;    
 }
 
-WebAppBase* WebAppFactoryLuna::createWebApp(Window::Type winType, SysMgrWebBridge* page, PIpcChannel* channel, ApplicationDescription* desc)
+WebAppBase* WebAppFactoryLuna::createWebApp(WindowType::Type winType, SysMgrWebBridge* page, PIpcChannel* channel, ApplicationDescription* desc)
 {
     WebAppBase* app = 0;
 
     switch (winType) {
-    case Window::Type_Card:
-    case Window::Type_ChildCard:
-    case Window::Type_PIN:
-    case Window::Type_Emergency:
-    case Window::Type_ModalChildWindowCard:
+    case WindowType::Type_Card:
+    case WindowType::Type_ChildCard:
+    case WindowType::Type_PIN:
+    case WindowType::Type_Emergency:
+    case WindowType::Type_ModalChildWindowCard:
         app = new CardWebApp(winType, channel, desc);
         break;
-    case Window::Type_DockModeWindow:
+    case WindowType::Type_DockModeWindow:
         app = new DockWebApp(winType, channel);
         break;
-    case Window::Type_Dashboard:
+    case WindowType::Type_Dashboard:
         app = new DashboardWebApp(channel);
         break;
-    case Window::Type_PopupAlert:
-    case Window::Type_BannerAlert:
+    case WindowType::Type_PopupAlert:
+    case WindowType::Type_BannerAlert:
         {
         QRect reqGeom = page->requestedGeometry();
         if (m_dashboardOwnsNegativeSpace)
@@ -119,18 +119,18 @@ WebAppBase* WebAppFactoryLuna::createWebApp(Window::Type winType, SysMgrWebBridg
             app = new AlertWebApp(page->appId(), kTableUiAlertWidth, reqGeom.height(), winType, channel);
         break;
         }
-    case Window::Type_Menu:
+    case WindowType::Type_Menu:
         app = new WindowedWebApp(WebAppManager::instance()->currentUiWidth(),
                 WebAppManager::instance()->currentUiHeight() -
                 Settings::LunaSettings()->positiveSpaceTopPadding,
                 winType, channel);
         break;
-    case Window::Type_Overlay:
+    case WindowType::Type_Overlay:
         app = new WindowedWebApp(WebAppManager::instance()->currentUiWidth(),
                 WebAppManager::instance()->currentUiHeight(),
                 winType, channel);
         break;
-    case Window::Type_StatusBar:
+    case WindowType::Type_StatusBar:
         app = new WindowedWebApp(WebAppManager::instance()->currentUiWidth(),
                 Settings::LunaSettings()->positiveSpaceTopPadding,
                 winType, channel);
@@ -142,12 +142,12 @@ WebAppBase* WebAppFactoryLuna::createWebApp(Window::Type winType, SysMgrWebBridg
     return app;
 }
 
-WebAppBase* WebAppFactoryLuna::createWebApp(Window::Type winType, int width, int height, PIpcChannel* channel, ApplicationDescription* desc)
+WebAppBase* WebAppFactoryLuna::createWebApp(WindowType::Type winType, int width, int height, PIpcChannel* channel, ApplicationDescription* desc)
 {
 	WebAppBase* app = 0;
 
 	switch (winType) {
-	case (Window::Type_PopupAlert):
+    case (WindowType::Type_PopupAlert):
 		if(true == m_dashboardOwnsNegativeSpace)
 			app = new AlertWebApp(QString(), WebAppManager::instance()->currentUiWidth(), height, winType, channel);
 		else

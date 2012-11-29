@@ -29,9 +29,6 @@
 #include "Logging.h"
 #include <cjson/json.h>
 
-//for launcher3 saving
-#include "pagesaver.h"
-
 /* BackupManager implementation is based on the API documented at https://wiki.palm.com/display/ServicesEngineering/Backup+and+Restore+2.0+API
  * On the LunaSysMgr side, this backs up launcher, quick launch and dock mode settings
  * On the WebAppMgr side, this backs up the sysmgr cookies
@@ -45,12 +42,6 @@ BackupManager* BackupManager::s_instance = NULL;
 static const char * strCookieAppId = "com.palm.luna-sysmgr.cookies";
 static const char * strCookieTempFile = "/tmp/com.palm.luna-sysmgr.cookies-html5-backup.sql";
 
-
-/* this is the browser db file that was previously backed up by sysmgr, but will now move to mojodb.
- * this is needed only for the first restore after the ota for blowfish
- */
-static const char * strBrowserDbFile = "/tmp/com.palm.app.browser-html5-backup.sql";
-static const char * strBrowserDbUrl = "file:///usr/palm/applications/com.palm.app.browser/index.html:0";
 /*! \page com_palm_app_data_backup Service API com.palm.appDataBackup/
  *  Public methods:
  *  - \ref com_palm_app_data_backup_post_restore
@@ -125,55 +116,14 @@ bool BackupManager::init(GMainLoop* mainLoop)
 BackupManager::~BackupManager()
 {
     if (m_serverService) {
-	LSError error;
-	LSErrorInit(&error);
+        LSError error;
+        LSErrorInit(&error);
 
-	bool succeeded = LSUnregisterPalmService(m_serverService, &error);
-	if (!succeeded) {
-	    g_warning("Failed unregistering backup service: %s", error.message);
-	    LSErrorFree(&error);
-	}
-    }
-}
-
-
-void BackupManager::initFilesForBackup()
-{
-//	if (!m_backupFiles.empty())
-//		return;
-
-	g_message("%s: entry",__FUNCTION__);
-	m_backupFiles.clear();
-
-    if (m_doBackupFiles) {
-    	g_message("%s: adding files to backup list",__FUNCTION__);
-		m_backupFiles.push_back ("/var/luna/preferences/launcher-cards.json");
-		if (g_file_test(Settings::LunaSettings()->firstCardLaunch.c_str(), G_FILE_TEST_EXISTS))
-			m_backupFiles.push_back (Settings::LunaSettings()->firstCardLaunch.c_str());
-		if (g_file_test(Settings::LunaSettings()->quicklaunchUserPositions.c_str(), G_FILE_TEST_EXISTS))
-			m_backupFiles.push_back (Settings::LunaSettings()->quicklaunchUserPositions.c_str());
-		if (g_file_test(Settings::LunaSettings()->dockModeUserPositions.c_str(), G_FILE_TEST_EXISTS))
-			m_backupFiles.push_back (Settings::LunaSettings()->dockModeUserPositions.c_str());
-
-		QList<QString> fileList;
-
-		DimensionsSystemInterface::PageSaver::filesForBackup(&fileList);
-		for (QList<QString>::const_iterator file_it = fileList.constBegin();
-				file_it != fileList.constEnd();file_it++)
-		{
-			if (!(file_it->isEmpty()))
-			{
-				if (g_file_test(file_it->toUtf8().constData(), G_FILE_TEST_EXISTS))
-				{
-					m_backupFiles.push_back(file_it->toUtf8().constData());
-					g_message("%s: backing up signalled file: %s",__FUNCTION__,file_it->toUtf8().constData());
-				}
-			}
-		}
-    }
-    else
-    {
-    	g_message("%s: DID NOT add files to backup list (backup files? flag was false)",__FUNCTION__);
+        bool succeeded = LSUnregisterPalmService(m_serverService, &error);
+        if (!succeeded) {
+            g_warning("Failed unregistering backup service: %s", error.message);
+            LSErrorFree(&error);
+        }
     }
 }
 
@@ -267,22 +217,8 @@ bool BackupManager::preBackupCallback( LSHandle* lshandle, LSMessage *message, v
 	json_object_object_add (response, "description", json_object_new_string ("Backup of LunaSysMgr files for launcher, quicklaunch, dockmode and sysmgr cookies"));
 	json_object_object_add (response, "version", json_object_new_string ("1.0"));
 
-	// adding the files for backup at the time of request. 
-	// if the user has created custom quicklaunch or dockmode settings, those files should be available now.
-	pThis->initFilesForBackup();
-
 	struct json_object* files = json_object_new_array();
 	GFileTest fileTest = static_cast<GFileTest>(G_FILE_TEST_EXISTS|G_FILE_TEST_IS_REGULAR);
-
-	if (pThis->m_doBackupFiles) {
-	    std::list<std::string>::const_iterator i;
-	    for (i = pThis->m_backupFiles.begin(); i != pThis->m_backupFiles.end(); ++i) {
-			if (g_file_test(i->c_str(), fileTest)) {
-				json_object_array_add (files, json_object_new_string(i->c_str()));
-				g_debug ("added file %s to the backup list", i->c_str());
-			}
-	    }
-	}
 
 	if (pThis->m_doBackupCookies) {
 	    //FIXME-qtwebkit: bool succeeded = Palm::WebGlobal::startDatabaseDump (Palm::k_PhonyCookieUrl, "cookies", strCookieTempFile, NULL);
@@ -372,58 +308,9 @@ bool BackupManager::postRestoreCallback( LSHandle* lshandle, LSMessage *message,
 
     const char* str = LSMessageGetPayload(message);
     if (!str)
-	return true;
+        return true;
 
     g_warning ("[BACKUPTRACE] %s: received %s", __func__, str);
-    json_object* root = json_tokener_parse(str);
-    if (!root || is_error(root))
-	return true;
-
-    json_object* files = json_object_object_get (root, "files");
-    if (!files) {
-	g_warning ("No files specified in postRestore message");
-	return true;
-    }
-
-    array_list* fileArray = json_object_get_array (files);
-    if (!fileArray) {
-	g_warning ("files is not an array");
-	return true;
-    }
-
-    int fileArrayLength = array_list_length (fileArray);
-    int index = 0;
-
-    g_debug ("%s: fileArrayLength = %d", __func__, fileArrayLength);
-
-    if (pThis->m_doBackupCookies) {
-	for (index = 0; index < fileArrayLength; ++index) {
-	    json_object* obj = (json_object*) array_list_get_idx (fileArray, index);
-	    if (!obj)
-		continue;
-
-	    std::string path = json_object_get_string (obj);
-	    if (path == strCookieTempFile) {
-		/*FIXME-qtwebkit: bool succeeded = Palm::WebGlobal::startDatabaseRestore(Palm::k_PhonyCookieUrl, "cookies", path, NULL);
-		// this call is synchronous for cookies
-		if (!succeeded) {
-		    g_warning ("Unable to restore the cookies");
-		}
-		else {
-		    g_debug ("cookies restored from %s to %s", path.c_str(), Palm::k_PhonyCookieUrl);
-		}*/
-	    }
-	    if (path == strBrowserDbFile) {
-		/*FIXME-qtwebkit: bool succeeded = Palm::WebGlobal::startDatabaseRestore(strBrowserDbUrl, "browser_data", path, NULL);
-		if (!succeeded) {
-		    g_warning ("Unable to restore the browser_data database");
-		}
-		else {
-		    g_debug ("browser_data database restored");
-		}*/
-	    }
-	}
-    }
 
     // no work needed for regular files
     LSError lserror;
@@ -434,13 +321,11 @@ bool BackupManager::postRestoreCallback( LSHandle* lshandle, LSMessage *message,
 
     g_message ("Sending response to postRestoreCallback: %s", json_object_to_json_string (response));
     if (!LSMessageReply (lshandle, message, json_object_to_json_string(response), &lserror )) {
-	g_warning("Can't send reply to postRestoreCallback error: %s", lserror.message);
-	LSErrorFree (&lserror); 
+        g_warning("Can't send reply to postRestoreCallback error: %s", lserror.message);
+        LSErrorFree (&lserror);
     }
-
     json_object_put (response);
     return true;
-
 }
 
 

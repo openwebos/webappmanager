@@ -17,25 +17,20 @@
 * LICENSE@@@ */
 
 
-
-
-#ifndef WEBAPPFACTORYMINIMAL_H
-#define WEBAPPFACTORYMINIMAL_H
-
 #include "Common.h"
 
-#include "WebAppFactory.h"
+#include <cjson/json.h>
 
-class WebAppFactoryMinimal : public WebAppFactory
+#include "ApplicationDescription.h"
+
+
+ApplicationDescription::ApplicationDescription()
 {
-public:
+}
 
-	WebAppFactoryMinimal() {}
-	virtual ~WebAppFactoryMinimal() {}
-
-    virtual WebAppBase* createWebApp(WindowType::Type winType, PIpcChannel* channel, ApplicationDescription* desc = 0);
-    virtual WebAppBase* createWebApp(WindowType::Type winType, SysMgrWebBridge* page, PIpcChannel* channel, ApplicationDescription* desc = 0);
-    virtual WebAppBase* createWebApp(WindowType::Type winType, int width, int height, PIpcChannel* channel, ApplicationDescription* desc = 0);
-};	
-
-#endif /* WEBAPPFACTORYMINIMAL_H */
+ApplicationDescription* ApplicationDescription::fromJsonString(const char* jsonStr, ApplicationDescription* base)
+{
+    ApplicationDescription* appDesc = base;
+    if (!appDesc) appDesc = new ApplicationDescription();
+    return ApplicationDescriptionBase::fromJsonString(jsonStr, static_cast<ApplicationDescriptionBase*>(appDesc));
+}

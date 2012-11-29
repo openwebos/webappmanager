@@ -29,8 +29,9 @@
 #include "WebAppManager.h"
 #include "WebAppFactory.h"
 #include "SysMgrWebBridge.h"
-#include "Window.h"
-#include "WindowContentTransitionRunner.h"
+#include "WindowTypes.h"
+// This include is used in out commented code only
+//#include "WindowContentTransitionRunner.h"
 #include "Time.h"
 #include "RemoteWindowData.h"
 
@@ -49,7 +50,7 @@
 #include <PIpcMessageMacros.h>
 
 
-DockWebApp::DockWebApp(Window::Type winType, PIpcChannel *channel)
+DockWebApp::DockWebApp(WindowType::Type winType, PIpcChannel *channel)
 	: CardWebApp(winType, channel)
 {
 	

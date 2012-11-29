@@ -23,7 +23,6 @@
 
 #include "WebAppFactoryMinimal.h"
 
-#include "AlertWebApp.h"
 #include "CardWebApp.h"
 #include "Settings.h"
 #include "WebAppBase.h"
@@ -32,33 +31,33 @@
 #include "WebAppManager.h"
 #include <PIpcChannel.h>
 
-WebAppBase* WebAppFactoryMinimal::createWebApp(Window::Type winType, PIpcChannel* channel, ApplicationDescription* desc)
+WebAppBase* WebAppFactoryMinimal::createWebApp(WindowType::Type winType, PIpcChannel* channel, ApplicationDescription* desc)
 {
 	WebAppBase* app = 0;
 	
 	const HostInfo& info = WebAppManager::instance()->getHostInfo();
 
 	switch (winType) {
-	case (Window::Type_Card):
-	case (Window::Type_ChildCard):
+	case (WindowType::Type_Card):
+	case (WindowType::Type_ChildCard):
 		app = new CardWebApp(winType, channel, desc);
 		break;
-	case (Window::Type_StatusBar):
+	case (WindowType::Type_StatusBar):
 		app = new WindowedWebApp(info.displayWidth,
 								 Settings::LunaSettings()->positiveSpaceTopPadding,
 								 winType, channel);
 		break;
-	case (Window::Type_Overlay):
-	case (Window::Type_Launcher):
-	case (Window::Type_Menu):
+	case (WindowType::Type_Overlay):
+	case (WindowType::Type_Launcher):
+	case (WindowType::Type_Menu):
 		app = new WindowedWebApp(info.displayWidth,
 								 info.displayHeight,
 								 winType, channel);
 		break;
-	case (Window::Type_None):
+	case (WindowType::Type_None):
 		app = new WebAppBase();
 		break;
-	case (Window::Type_Dashboard):
+	case (WindowType::Type_Dashboard):
 	default:
 		g_warning("unsupported window type: %d", winType);
 		break;
@@ -67,33 +66,33 @@ WebAppBase* WebAppFactoryMinimal::createWebApp(Window::Type winType, PIpcChannel
 	return app;    
 }
 
-WebAppBase* WebAppFactoryMinimal::createWebApp(Window::Type winType, SysMgrWebBridge* page, PIpcChannel* channel, ApplicationDescription* desc)
+WebAppBase* WebAppFactoryMinimal::createWebApp(WindowType::Type winType, SysMgrWebBridge* page, PIpcChannel* channel, ApplicationDescription* desc)
 {
 	WebAppBase* app = 0;
 	
 	const HostInfo& info = WebAppManager::instance()->getHostInfo();
 
 	switch (winType) {
-	case (Window::Type_Card):
-	case (Window::Type_ChildCard):
+	case (WindowType::Type_Card):
+	case (WindowType::Type_ChildCard):
 		app = new CardWebApp(winType, channel, desc);
 		break;
-	case (Window::Type_StatusBar):
+	case (WindowType::Type_StatusBar):
 		app = new WindowedWebApp(info.displayWidth,
 								 Settings::LunaSettings()->positiveSpaceTopPadding,
 								 winType, channel);
 		break;
-	case (Window::Type_Overlay):
-	case (Window::Type_Launcher):
-	case (Window::Type_Menu):
+	case (WindowType::Type_Overlay):
+	case (WindowType::Type_Launcher):
+	case (WindowType::Type_Menu):
 		app = new WindowedWebApp(info.displayWidth,
 								 info.displayHeight,
 								 winType, channel);
 		break;
-	case (Window::Type_None):
+	case (WindowType::Type_None):
 		app = new WebAppBase();
 		break;
-	case (Window::Type_Dashboard):
+	case (WindowType::Type_Dashboard):
 	default:
 		g_warning("unsupported window type: %d", winType);
 		break;
@@ -102,7 +101,7 @@ WebAppBase* WebAppFactoryMinimal::createWebApp(Window::Type winType, SysMgrWebBr
 	return app;        
 }
 
-WebAppBase* WebAppFactoryMinimal::createWebApp(Window::Type winType, int width, int height, PIpcChannel* channel, ApplicationDescription* desc)
+WebAppBase* WebAppFactoryMinimal::createWebApp(WindowType::Type winType, int width, int height, PIpcChannel* channel, ApplicationDescription* desc)
 {
 	WebAppBase* app = 0;
 
