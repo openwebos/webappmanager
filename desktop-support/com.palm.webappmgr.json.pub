@@ -1,0 +1,19 @@
+{
+    "role": {
+        "exeName":"/usr/lib/luna/WebAppMgr",
+        "type": "regular",
+        "allowedNames": ["", "com.palm.lunastats", "com.palm.appDataBackup","com.palm.luna-*"]
+    },
+    "permissions": [
+        {
+            "service":"com.palm.lunastats",
+            "inbound":["*"],
+            "outbound":["*"]
+        },
+        {
+            "service":"com.palm.appDataBackup",
+            "inbound":["*"],
+            "outbound":["*"]
+        }
+    ]
+}
