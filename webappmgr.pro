@@ -28,8 +28,6 @@ ENV_BUILD_TYPE = $$(BUILD_TYPE)
     CONFIG += $$ENV_BUILD_TYPE
 }
 
-include(Src/nyx/nyx.pri)
-
 # Prevent conflict with usage of "signal" in other libraries
 CONFIG += no_keywords
 
@@ -83,8 +81,6 @@ DEFINES += SHIPPING_VERSION=0
 SOURCES += \
         AlertWebApp.cpp \
         ApplicationDescription.cpp \
-        ApplicationDescriptionBase.cpp \
-        AsyncCaller.cpp \
         BackupManager.cpp \
         BannerMessageEventFactory.cpp \
         CardWebApp.cpp \
@@ -92,26 +88,15 @@ SOURCES += \
         DeviceInfo.cpp \
         DockWebApp.cpp \
         EventReporter.cpp \
-        HostBase.cpp \
-        JSONUtils.cpp \
         KeyboardMapping.cpp \
         KeywordMap.cpp \
-        LocalePreferences.cpp \
-        Localization.cpp \
-        Logging.cpp \
         Main.cpp \
         MemoryWatcher.cpp \
-        Mutex.cpp \
         PalmSystem.cpp \
         ProcessManager.cpp \
         RemoteWindowData.cpp \
-        Settings.cpp \
-        SingletonTimer.cpp \
         SyncTask.cpp \
         SysMgrWebBridge.cpp \
-        TaskBase.cpp \
-        Timer.cpp \
-        Utils.cpp \
         WebAppBase.cpp \
         WebAppCache.cpp \
         WebAppDeferredUpdateHandler.cpp \
@@ -120,56 +105,32 @@ SOURCES += \
         WebAppFactoryLuna.cpp \
         WebAppManager.cpp \
         WebKitEventListener.cpp \
-        WindowedWebApp.cpp \
-        WindowProperties.cpp
+        WindowedWebApp.cpp
 
 HEADERS += \
         AlertWebApp.h \
         ApplicationDescription.h \
-        ApplicationDescriptionBase.h \
-        AsyncCaller.h \
         BackupManager.h \
         BannerMessageEventFactory.h \
         CardWebApp.h \
-        Common.h \
-        CustomEvents.h \
         DashboardWebApp.h \
         Debug.h \
         DeviceInfo.h \
         DockWebApp.h \
-        Event.h \
         EventReporter.h \
-        HostBase.h \
-        InputControl.h \
-        JSONUtils.h \
         KeyboardMapping.h \
         KeywordMap.h \
-        LedControl.h \
-        LocalePreferences.h \
-        Localization.h \
-        Logging.h \
         MemoryWatcher.h \
-        Mutex.h \
-        MutexLocker.h \
         NewContentIndicatorEventFactory.h \
         PalmSystem.h \
         ProcessBase.h \
         ProcessManager.h \
-        QtUtils.h \
         RemoteWindowData.h \
-        Settings.h \
         SharedGlobalProperties.h \
-        SingletonTimer.h \
-        SignalSlot.h \
         SoundPlayerPool.h \
-        sptr.h \
         SyncTask.h \
         SysMgrWebBridge.h \
         SystemUiController.h \
-        TaskBase.h \
-        Time.h \
-        Timer.h \
-        Utils.h \
         WebAppBase.h \
         WebAppCache.h \
         WebAppDeferredUpdateHandler.h \
@@ -179,9 +140,7 @@ HEADERS += \
         WebAppManager.h \
         WebKitEventListener.h \
         WindowedWebApp.h \
-        WindowMetaData.h \
-        WindowProperties.h \
-        WindowTypes.h \
+        WindowMetaData.h
 
 QMAKE_CXXFLAGS += -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden -Wall -fpermissive
 QMAKE_CXXFLAGS += -DFIX_FOR_QT 
@@ -304,6 +263,7 @@ OBJECTS_DIR = $$DESTDIR/.obj
 MOC_DIR = $$DESTDIR/.moc
 
 TARGET = WebAppMgr
+LIBS += -llunaSysMgrCommon
 
 # Comment these out to get verbose output
 #QMAKE_CXX = @echo Compiling $(@)...; $$QMAKE_CXX

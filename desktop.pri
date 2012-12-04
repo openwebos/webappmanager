@@ -51,9 +51,6 @@ CONFIG_BUILD += opengl
 
 #CONFIG_BUILD += openglcomposited
 
-SOURCES += HostQtDesktop.cpp FlickGestureRecognizer.cpp
-HEADERS += HostQtDesktop.h FlickGestureRecognizer.h FlickGesture.h
-
 LIBS += \
 	-Wl,-rpath $$(LUNA_STAGING)/lib \
 	-L$$(LUNA_STAGING)/lib \
@@ -69,6 +66,7 @@ INCLUDEPATH += \
 	$$(LUNA_STAGING)/include/QtDeclarative \
 	$$(LUNA_STAGING)/include/sysmgr-ipc \
 	$$(LUNA_STAGING)/include/ime \
+        $$(LUNA_STAGING)/include/luna-sysmgr-common
 
 
 #install
