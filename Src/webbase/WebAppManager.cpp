@@ -56,6 +56,8 @@
 #include "Time.h"
 #include "SharedGlobalProperties.h"
 
+#include <ProcessKiller.h>
+
 #include <algorithm>
 #include "cjson/json.h"
 #include "lunaservice.h"
@@ -244,13 +246,6 @@ WebAppManager::~WebAppManager()
     delete m_Application;
 }
 
-void WebAppManager::localeChanged()
-{
-    // Don't shutdown for locale changes in minimal mode
-    if (Settings::LunaSettings()->uiType != Settings::UI_MINIMAL)
-        m_Application->exit(0);
-}
-
 void WebAppManager::run()
 {
 	threadStarting();
@@ -261,7 +256,7 @@ void WebAppManager::run()
 	markUniversalSearchReady();
 
     LocalePreferences* lp = LocalePreferences::instance();
-    QObject::connect(lp, SIGNAL(prefsLocaleChanged()), SLOT(localeChanged()));
+    QObject::connect(lp, SIGNAL(prefsLocaleChanged()), new ProcessKiller(), SLOT(localeChanged()));
 
 #ifdef HAS_NYX
 	nyx_init();

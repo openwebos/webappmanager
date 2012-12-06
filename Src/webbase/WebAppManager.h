@@ -60,13 +60,11 @@ class ApplicationDescription;
 
 #define WEB_APP_MGR_IPC_NAME "WebAppManager"
 
-class WebAppManager : public QObject
-                    , public SyncTask
+class WebAppManager : public SyncTask
 					, public Trackable
 					, public PIpcClient
 					, public PIpcChannelListener
 {
-    Q_OBJECT
 public:
 
 	static WebAppManager* instance();
@@ -209,7 +207,6 @@ private:
 	static bool displayManagerCallback(LSHandle* sh, LSMessage* message, void* ctx);	
 
 	void slotMemoryStateChanged(MemoryWatcher::MemState state);
-    Q_INVOKABLE void localeChanged();
 
 	static gboolean deletePagesCallback(gpointer arg);
 	void deletePages();
