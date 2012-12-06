@@ -27,7 +27,7 @@ public:
     ApplicationDescription();
     virtual ~ApplicationDescription() {}
 
-    static ApplicationDescription* fromJsonString(const char* jsonStr, ApplicationDescription* base=NULL);
+    static ApplicationDescription* fromJsonString(const char* jsonStr);
 };
 
 #endif /* APPLICATIONDESCRIPTION_H */

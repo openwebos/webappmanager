@@ -18,6 +18,7 @@
 
 
 #include "Common.h"
+#include <stdio.h>
 
 #include <cjson/json.h>
 
@@ -28,9 +29,23 @@ ApplicationDescription::ApplicationDescription()
 {
 }
 
-ApplicationDescription* ApplicationDescription::fromJsonString(const char* jsonStr, ApplicationDescription* base)
+ApplicationDescription* ApplicationDescription::fromJsonString(const char* jsonStr)
 {
-    ApplicationDescription* appDesc = base;
-    if (!appDesc) appDesc = new ApplicationDescription();
-    return ApplicationDescriptionBase::fromJsonString(jsonStr, static_cast<ApplicationDescriptionBase*>(appDesc));
+    struct json_object* root = json_tokener_parse( jsonStr );
+    if( !root || is_error( root ) )
+    {
+        fprintf( stderr, "ApplicationDescriptionBase::fromJsonString: Failed to parse string into a JSON string.\n" );
+        return 0;
+    }
+
+    ApplicationDescription* appDesc = new ApplicationDescription();
+
+    if (!appDesc->fromJsonObject(root))
+    {
+        delete appDesc;
+        appDesc = 0;
+    }
+    if(root && !is_error(root))
+        json_object_put(root);
+    return appDesc;
 }
