@@ -263,7 +263,7 @@ OBJECTS_DIR = $$DESTDIR/.obj
 MOC_DIR = $$DESTDIR/.moc
 
 TARGET = WebAppMgr
-LIBS += -llunaSysMgrCommon
+LIBS += -lLunaSysMgrCommon
 
 # Comment these out to get verbose output
 #QMAKE_CXX = @echo Compiling $(@)...; $$QMAKE_CXX
