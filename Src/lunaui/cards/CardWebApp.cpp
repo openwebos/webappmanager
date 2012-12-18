@@ -52,6 +52,16 @@
 #include <QDebug>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QGraphicsWebView>
+
+#include <SysMgrDeviceKeydefs.h>
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+    #define KEYS Qt
+#else
+    #define KEYS
+#endif
+
 
 #if defined(HAVE_OPENGL)
 #include <QGLWidget>
@@ -498,15 +508,15 @@ void CardWebApp::keyEvent(QKeyEvent* e)
 	}
 
 	if (inLandScapeMode) {
-		if (e->key() == Qt::Key_CoreNavi_Back ||
-			e->key() == Qt::Key_CoreNavi_Previous) {
+        if (e->key() == KEYS::Key_CoreNavi_Back ||
+            e->key() == KEYS::Key_CoreNavi_Previous) {
 			int ev_key = (m_orientation == Event::Orientation_Right) ? Qt::Key_PageDown : Qt::Key_PageUp;
 			QKeyEvent ev(e->type(), ev_key, e->modifiers());
 			WindowedWebApp::keyEvent(&ev);
 			return;
 		}
-		else if (e->key() == Qt::Key_CoreNavi_Menu ||
-				 e->key() == Qt::Key_CoreNavi_Next) {
+        else if (e->key() == KEYS::Key_CoreNavi_Menu ||
+                 e->key() == KEYS::Key_CoreNavi_Next) {
 			int ev_key = (m_orientation == Event::Orientation_Right) ? Qt::Key_PageUp : Qt::Key_PageDown;
 			QKeyEvent ev(e->type(), ev_key, e->modifiers());
 			WindowedWebApp::keyEvent(&ev);

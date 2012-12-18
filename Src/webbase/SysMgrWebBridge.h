@@ -8,6 +8,8 @@
 #include <QPointer>
 
 #include <palmimedefines.h>
+#include <QWebPage>
+#include <QWebFrame>
 
 typedef QMap<QString, QVariant> StringVariantMap;
 class WebAppBase;

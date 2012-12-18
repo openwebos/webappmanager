@@ -200,7 +200,12 @@ void SysMgrWebBridge::setupStageArgs(const QUrl url)
 {
     m_stageArgs.clear();
     if (url.hasQuery()) {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
         QList<QPair<QString, QString> > items = url.queryItems();
+#else
+        QUrlQuery uq(url);
+        QList<QPair<QString, QString> > items = uq.queryItems();
+#endif
         for (QList<QPair<QString, QString> >::const_iterator it = items.constBegin(); it != items.end(); it++) {
             QPair<QString, QString> item = *it;
             m_stageArgs[item.first] = item.second;
@@ -354,7 +359,7 @@ void SysMgrWebBridge::closePageSoon()
 const char* SysMgrWebBridge::getIdentifier()
 {
     if (m_identifier.empty())
-        m_identifier = windowIdentifierFromAppAndProcessId(appId().toAscii().constData(), processId().toAscii().constData());
+        m_identifier = windowIdentifierFromAppAndProcessId(appId().toLatin1().constData(), processId().toLatin1().constData());
 
     return m_identifier.c_str();
 }
@@ -386,10 +391,13 @@ void SysMgrWebBridge::slotViewportChangeRequested()
 
 void SysMgrWebBridge::slotSetupPage(const QUrl& url)
 {
+    // QT5_TODO:
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
     QString attributes = m_page->attributes();
     if (!attributes.isEmpty())
         setArgs(attributes.toUtf8().constData());
     else
+#endif
         setupStageArgs(url);
     QString windowType = m_stageArgs.value("window").toString();
     SysMgrWebBridge* parent = 0;
@@ -473,12 +481,18 @@ SysMgrWebPage::SysMgrWebPage(QObject* parent) : QWebPage(parent)
     const char* defaultStoragePath = "/media/cryptofs/.sysmgr";
     const char* envStoragePath = ::getenv("PERSISTENT_STORAGE_PATH");
     const char* storagePath = envStoragePath ? envStoragePath : defaultStoragePath;
+
     settings()->setAttribute(QWebSettings::JavascriptCanOpenWindows, true);
     settings()->setAttribute(QWebSettings::JavascriptCanCloseWindows, true);
     settings()->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls, true);
     settings()->setAttribute(QWebSettings::LocalContentCanAccessFileUrls, true);
     settings()->setAttribute(QWebSettings::PluginsEnabled, true);
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
     settings()->setPluginSupplementalPath("/usr/lib/BrowserPlugins");
+#else
+    // QT5_TODO (questionable fix)
+    ::setenv("QTWEBKIT_PLUGIN_PATH", "/usr/lib/BrowserPlugins", 1);
+#endif
     settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     settings()->setAttribute(QWebSettings::OfflineStorageDatabaseEnabled, true);
     settings()->setAttribute(QWebSettings::OfflineWebApplicationCacheEnabled, true);

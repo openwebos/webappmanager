@@ -2165,8 +2165,7 @@ bool WebAppManager::headlessAppWatchCallback()
 	     it != m_headlessAppLaunchTimeMap.end();) {
 
 		WebAppBase* app = it->first;
-
-		g_message("WATCH: Checking app: %s", app->appId().toAscii().data());
+        g_message("WATCH: Checking app: %s", app->appId().toLatin1().data());
 
 		// this should not happen
 		if (!app->page()) {

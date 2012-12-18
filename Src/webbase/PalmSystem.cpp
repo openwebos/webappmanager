@@ -51,7 +51,7 @@ void PalmSystem::setLaunchParams(const QString& params)
     QString p = params;
     if (!params.isEmpty()) {
         pbnjson::JDomParser parser;
-        if (parser.parse(p.toAscii().constData(), pbnjson::JSchemaFragment("{}"))) {
+        if (parser.parse(p.toLatin1().constData(), pbnjson::JSchemaFragment("{}"))) {
             pbnjson::JValue root = parser.getDom();
             if (root.isObject() && root.begin() == root.end())
                 p = QString();

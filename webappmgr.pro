@@ -34,7 +34,7 @@ CONFIG += no_keywords
 CONFIG += link_pkgconfig
 PKGCONFIG = glib-2.0 gthread-2.0
 
-QT = core gui declarative webkit network
+QT = core gui quick webkit network webkitwidgets widgets
 
 VPATH += \
     ./Src \

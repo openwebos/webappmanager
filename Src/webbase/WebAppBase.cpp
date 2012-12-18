@@ -194,7 +194,7 @@ void WebAppBase::uriChanged(const char* uri)
 }
 void WebAppBase::uriChanged(const QUrl& uri)
 {
-    uriChanged(uri.toString().toAscii().constData());
+    uriChanged(uri.toString().toLatin1().constData());
 }
 
 void WebAppBase::titleChanged(const char* title)
@@ -223,9 +223,9 @@ void WebAppBase::createActivity()
     json_object* payload = json_object_new_object();
     json_object* activityObj = json_object_new_object();
     json_object_object_add(activityObj, (char*) "name",
-                           json_object_new_string(m_appId.toAscii().constData()));
+                           json_object_new_string(m_appId.toLatin1().constData()));
     json_object_object_add(activityObj, (char*) "description",
-                           json_object_new_string(m_processId.toAscii().constData()));
+                           json_object_new_string(m_processId.toLatin1().constData()));
     json_object* activityTypeObj = json_object_new_object();
     json_object_object_add(activityTypeObj, (char*) "foreground",
                            json_object_new_boolean(true));
