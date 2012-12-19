@@ -56,7 +56,7 @@ VPATH += \
     ./Src/lunaui/status-bar
 
 
-INCLUDEPATH = $$VPATH
+INCLUDEPATH = $$VPATH $$(LUNA_STAGING)/usr/include
 
 DEFINES += QT_WEBOS
 
@@ -149,7 +149,8 @@ QMAKE_CXXFLAGS += -DFIX_FOR_QT
 # Override the default (-Wall -W) from g++.conf mkspec (see linux-g++.conf)
 QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-parameter -Wno-unused-variable -Wno-reorder -Wno-missing-field-initializers -Wno-extra
 
-LIBS += -lcjson -lLunaSysMgrIpc -llunaservice -lpbnjson_cpp -lssl -lsqlite3 -lssl -lcrypto # -lgcov
+LIBS += -L$$(LUNA_STAGING)/usr/lib -lcjson -lLunaSysMgrIpc -llunaservice -lpbnjson_cpp -lssl -lsqlite3 -lssl -lcrypto # -lgcov
+LIBS += -Wl,-rpath $$(LUNA_STAGING)/usr/lib
 
 linux-g++ {
     include(desktop.pri)
