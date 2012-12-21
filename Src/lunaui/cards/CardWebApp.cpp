@@ -239,7 +239,7 @@ CardWebApp::CardWebApp(WindowType::Type winType, PIpcChannel *channel, Applicati
     if (winType == WindowType::Type_Card || winType == WindowType::Type_PIN ||
         winType == WindowType::Type_Emergency || winType == WindowType::Type_ModalChildWindowCard) {
 		
-		init();
+		WindowedWebApp::init();
 
 		setOrientation(WebAppManager::instance()->orientation());
 

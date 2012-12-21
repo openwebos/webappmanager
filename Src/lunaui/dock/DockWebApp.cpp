@@ -65,7 +65,7 @@ DockWebApp::DockWebApp(WindowType::Type winType, PIpcChannel *channel)
 	
 	m_enableFullScreen = false;	
 	
-	init();
+	WindowedWebApp::init();
 	
 	setOrientation(WebAppManager::instance()->orientation());
 }

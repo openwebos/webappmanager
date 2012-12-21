@@ -32,9 +32,9 @@ ENV_BUILD_TYPE = $$(BUILD_TYPE)
 CONFIG += no_keywords
 
 CONFIG += link_pkgconfig
-PKGCONFIG = glib-2.0 gthread-2.0
+PKGCONFIG = glib-2.0 gthread-2.0 sqlite3
 
-QT = core gui quick webkit network webkitwidgets widgets
+QT = core gui quick webkit network widgets
 
 VPATH += \
     ./Src \
