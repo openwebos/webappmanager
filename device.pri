@@ -45,6 +45,7 @@ INCLUDEPATH += \
         $$(STAGING_INCDIR)/luna-sysmgr-common \
         $$(STAGING_INCDIR)/ime \
 
+LIBS += -Wl,-rpath $$(STAGING_LIBDIR)
 
 DEFINES += $$TARGET_TYPE HAS_LUNA_PREF=1 QT_PLUGIN QT_STATICPLUGIN HAS_QPA
 
