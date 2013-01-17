@@ -34,7 +34,15 @@ CONFIG += no_keywords
 CONFIG += link_pkgconfig
 PKGCONFIG = glib-2.0 gthread-2.0 sqlite3
 
-QT = core gui quick webkit network widgets
+QT = core gui quick webkit network widgets webkitwidgets
+
+QT_VERSION=$$[QT_VERSION]
+contains(QT_VERSION, "^5.*") {
+    message("Building for Qt5, enabling webkitwidgets")
+} else {
+    message("Building for Qt4, disabling webkitwidgets")
+    QT -= webkitwidgets
+}
 
 VPATH += \
     ./Src \
