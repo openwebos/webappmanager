@@ -66,7 +66,6 @@ INCLUDEPATH += \
 	$$(LUNA_STAGING)/include/QtOpenGL \
 	$$(LUNA_STAGING)/include/QtSql \
 	$$(LUNA_STAGING)/include/QtDeclarative \
-	$$(LUNA_STAGING)/include/sysmgr-ipc \
 	$$(LUNA_STAGING)/include/ime \
         $$(LUNA_STAGING)/include/luna-sysmgr-common \
 	$$(LUNA_STAGING)/usr/include
