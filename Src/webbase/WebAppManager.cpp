@@ -16,6 +16,12 @@
 *
 * LICENSE@@@ */
 
+/**
+@page com_palm_lunastats com.webos.lunastats
+@brief Provides statistics for Luna webappmanager component. These are deprecated in favor of their com.webos.webappmanager counterparts.
+@{
+@}
+*/
 
 #include "Common.h"
 
@@ -146,14 +152,7 @@ static WebAppManager* sInstance = 0;
 static const int kLunaStatsReportingIntervalSecs = 5;
 
 static bool PrvGetMemoryStatus(LSHandle* handle, LSMessage* message, void* ctxt);
-static bool PrvGetLunaStats(LSHandle* handle, LSMessage* message, void* ctxt);
-static bool PrvDoGc(LSHandle* handle, LSMessage* message, void* ctxt);
-static gboolean PrvPostLunaStats(gpointer ctxt);
 static bool PrvGetSystemTimeCallback(LSHandle* handle, LSMessage* message, void* ctxt);
-static bool PrvGetAppEvents(LSHandle* handle, LSMessage* message, void* ctxt);
-static bool EnablePiranhaFpsCounter(LSHandle* lsHandle, LSMessage *message, void *user_data);
-static bool PrvDumpRenderTree(LSHandle* lsHandle, LSMessage *message, void *user_data);
-static bool PrvDumpCompositedTree(LSHandle* lsHandle, LSMessage *message, void *user_data);
 
 #ifdef USE_HEAP_PROFILER
 static bool PrvDumpHeapProfiler(LSHandle* lsHandle, LSMessage *message, void *user_data);
@@ -177,12 +176,6 @@ static LSMethod sStatsMethodsPublic[] = {
 };
 
 static LSMethod sStatsMethodsPrivate[] = {
-	{ "getStats", PrvGetLunaStats },
-	{ "gc", PrvDoGc },
-	{ "getAppEvents", PrvGetAppEvents },
-	{ "enablePiranhaFpsCounter", EnablePiranhaFpsCounter},
-	{ "dumpRenderTree", PrvDumpRenderTree },
-	{ "dumpCompositedTree", PrvDumpCompositedTree },
 #ifdef USE_HEAP_PROFILER
 	{ "dumpHeapProfile", PrvDumpHeapProfiler },
 #endif
@@ -1579,36 +1572,47 @@ void WebAppManager::slotMemoryStateChanged(MemoryWatcher::MemState state)
 	json_object_put(reply);		
 }
 
-void WebAppManager::initiateLunaStatsReporting()
-{
-	static GSource* src = 0;
-	if (!src) {
-
-		src = g_timeout_source_new_seconds(kLunaStatsReportingIntervalSecs);
-		g_source_set_callback(src, PrvPostLunaStats, NULL, NULL);
-		g_source_attach(src, g_main_loop_get_context(WebAppManager::instance()->mainLoop()));
-		g_source_unref(src);
-	}
-}
-
 LSHandle* WebAppManager::getStatsServiceHandle() const
 {
 	return m_servicePrivate;
 }
 
-bool PrvDoGc(LSHandle* handle, LSMessage* message, void* ctxt)
-{
-//	Palm::WebGlobal::garbageCollectNow();
-
-	LSError lsError;
-	LSErrorInit(&lsError);
-	if (!LSMessageReply(handle, message, "{ \"returnValue\":true }", &lsError))
-		LSErrorFree(&lsError);
-
-	return true;
-}
-
 #ifdef USE_HEAP_PROFILER
+/////////////////////////////////////////////////////////////////
+//                                                             //
+//            Start of API documentation comment block         //
+//                                                             //
+/////////////////////////////////////////////////////////////////
+/**
+@page com_palm_lunastats com.palm.lunastats
+@{
+@section com_palm_lunastats_dumpHeapProfile dumpHeapProfile
+
+Dump a snapshot of the heap profile to /log
+
+@par Parameters
+
+Name | Required | Type | Description
+-----|--------|------|----------
+
+@par Returns(Call)
+
+Name | Required | Type | Description
+-----|--------|------|----------
+returnValue | yes | bool | Always true
+
+@par Returns(Subscription)
+
+Name | Required | Type | Description
+-----|--------|------|----------
+@}
+*/
+/////////////////////////////////////////////////////////////////
+//                                                             //
+//            End of API documentation comment block           //
+//                                                             //
+/////////////////////////////////////////////////////////////////
+
 static bool PrvDumpHeapProfiler(LSHandle* lsHandle, LSMessage *message,
 								void *user_data)
 {
@@ -1629,327 +1633,6 @@ static bool PrvDumpHeapProfiler(LSHandle* lsHandle, LSMessage *message,
 	return true;
 }
 #endif // USE_HEAP_PROFILER
-
-bool PrvGetLunaStats(LSHandle* handle, LSMessage* message, void* ctxt)
-{
-    SUBSCRIBE_SCHEMA_RETURN(handle, message);
-
-	bool ret = false;
-	LSError lsError;
-	bool subscribed = false;
-	std::string jsonStr;
-	std::string counters;
-    std::string perfStats;
-	std::multimap<std::string,std::string> docMap;
-
-	LSErrorInit(&lsError);
-
-	jsonStr = "{ ";
-
-	if (!message) {
-		ret = false;
-		goto Done;
-	}
-
-	if (LSMessageIsSubscription(message)) {
-
-		ret = LSSubscriptionProcess(handle, message, &subscribed, &lsError);
-		if (!ret) {
-			LSErrorFree(&lsError);
-			goto Done;
-		}
-	}
-/*
-	if (Palm::MemStats::getJSON(docMap, counters)) {
-
-		// assemble the documents array:
-		jsonStr += " \"documents\": [";
-
-		int index = 0;
-		std::multimap<std::string,std::string>::const_iterator it;
-		for (it=docMap.begin(), index = 0; it != docMap.end(); ++it, ++index) {
-
-			if (index != 0)
-				jsonStr += ", ";
-
-			jsonStr += "{ ";
-			jsonStr +=  it->second;
-			jsonStr += " }";
-		}
-
-		jsonStr += " ],\n";
-
-		// assemble the counters frame:
-		jsonStr += " \"counters\": {";
-		jsonStr += counters;
-		jsonStr += " }, ";
-	}
-*/
-/*    if (Palm::WebKitStats::getJSON(perfStats)) {
-        jsonStr += " \"perfStats\": ";
-        jsonStr += perfStats;
-        jsonStr += ", ";
-    }*/
-
-	if (subscribed)
-		WebAppManager::instance()->initiateLunaStatsReporting();
-
-Done:
-
-	jsonStr += "\"returnValue\":";
-	jsonStr += ret ? "true" : "false";
-	jsonStr += ", ";
-
-	jsonStr += "\"subscribed\":";
-	jsonStr += subscribed ? "true" : "false";
-	jsonStr += " }";
-
-	if (!LSMessageReply(handle, message, jsonStr.c_str(), &lsError))
-		LSErrorFree(&lsError);
-
-	return true;
-}
-
-gboolean PrvPostLunaStats(gpointer ctxt)
-{
-	LSError lsError;
-	std::string jsonStr;
-	std::string counters;
-	std::multimap<std::string,std::string> docMap;
-
-//	if (!Palm::MemStats::getJSON(docMap, counters))
-//		return TRUE;
-
-	LSErrorInit(&lsError);
-
-
-	jsonStr = "{ ";
-
-	// assemble the documents array:
-	jsonStr += " \"documents\": [";
-
-	int index = 0;
-	std::multimap<std::string,std::string>::const_iterator it;
-	for (it=docMap.begin(), index = 0; it != docMap.end(); ++it, ++index) {
-
-		if (index != 0)
-			jsonStr += ", ";
-
-		jsonStr += "{ ";
-		jsonStr +=  it->second;
-		jsonStr += " }";
-	}
-
-	jsonStr += " ],\n";
-
-	// assemble the counters frame:
-	jsonStr += " \"counters\": {";
-	jsonStr += counters;
-	jsonStr += " } ";
-
-    std::string perfStats;
-/*    if (Palm::WebKitStats::getJSON(perfStats)) {
-        jsonStr += ", \"perfStats\": ";
-        jsonStr += perfStats;
-    }*/
-
-	jsonStr += " }";
-
-	if (!LSSubscriptionPost(WebAppManager::instance()->getStatsServiceHandle(),
-							"/", "getStats", jsonStr.c_str(), &lsError))
-		LSErrorFree (&lsError);	
-
-	return TRUE;
-}
-
-bool PrvGetAppEvents(LSHandle* handle, LSMessage* message, void* ctxt)
-{
-    SUBSCRIBE_SCHEMA_RETURN(handle, message);
-
-	bool ret = true;
-	LSError lsError;
-	bool subscribed = false;
-	
-	LSErrorInit(&lsError);
-
-	if (!message) {
-		ret = false;
-		goto Done;
-	}
-
-	if (LSMessageIsSubscription(message)) {
-
-		ret = LSSubscriptionProcess(handle, message, &subscribed, &lsError);
-		if (!ret) {
-			LSErrorFree(&lsError);
-			goto Done;
-		}
-	}
-
-Done:
-
-	std::string jsonStr;
-	jsonStr += "\"returnValue\":";
-	jsonStr += ret ? "true" : "false";
-	jsonStr += ", ";
-
-	jsonStr += "\"subscribed\":";
-	jsonStr += subscribed ? "true" : "false";
-	jsonStr += " }";
-
-	if (!LSMessageReply(handle, message, jsonStr.c_str(), &lsError))
-		LSErrorFree(&lsError);
-
-	return true;	
-}
-
-bool PrvDumpRenderTree(LSHandle* lsHandle, LSMessage *message, void *user_data)
-{
-/*
-	std::stringstream retval;
-	retval << "{ \"cardViews\":[";
-
-	std::string quotes = "\"";
-	std::string replace_quotes = "\\\"";
-
-    std::list<const ProcessBase *> cards = WebAppManager::instance()->runningApps(WindowType::Type_Card);
-	for (std::list<const ProcessBase *>::const_iterator iter = cards.begin(); iter != cards.end(); iter++)
-	{
-		if (iter != cards.begin())
-			retval << ", ";
-
-		CardWebApp *card = static_cast<CardWebApp *>(WebAppManager::instance()->findApp((*iter)->processId()));
- 		retval << "{ \"tree\":\"";
-		std::string str = card->page()->webkitPage()->mainFrame()->renderTreeDump();
-
-		size_t start = 0;
-		while(1) {
-  			size_t pos = str.find(quotes, start);
-  			if (pos==std::string::npos)
-				break;
- 			str.replace(pos, quotes.size(), replace_quotes);
-  			start = pos + replace_quotes.size();
-		}
-
-		retval << str;
-		retval << "\" }";
-	}
-
-	retval << "], \"status\":true }";
-
-	LSError error;
-	LSErrorInit(&error);
-	if (!LSMessageReply(lsHandle, message, retval.str().c_str(), &error)) {
-		LSErrorFree(&error);
-	}
-*/
-	return true;
-}
-
-bool PrvDumpCompositedTree(LSHandle* lsHandle, LSMessage *message, void *user_data)
-{
-/*
-	std::stringstream retval;
-	retval << "{ \"cardViews\":[";
-
-    std::list<const ProcessBase *> cards = WebAppManager::instance()->runningApps(WindowType::Type_Card);
-	for (std::list<const ProcessBase *>::const_iterator iter = cards.begin(); iter != cards.end(); iter++)
-	{
-		if (iter != cards.begin())
-			retval << ", ";
-
-		CardWebApp *card = static_cast<CardWebApp *>(WebAppManager::instance()->findApp((*iter)->processId()));
-		card->page()->webkitView()->dumpCompositedTree(retval);
-	}
-
-	retval << "], \"memStats\":\"";
-//	Palm::WebView::dumpMemStats(retval);
-	retval << "\", \"status\":true }";
-
-	LSError error;
-	LSErrorInit(&error);
-	if (!LSMessageReply(lsHandle, message, retval.str().c_str(), &error)) {
-		LSErrorFree(&error);
-	}
-*/
-	return true;
-}
-
-bool EnablePiranhaFpsCounter(LSHandle* lsHandle, LSMessage *message, void *user_data)
-{
-/*
-	const char* str = LSMessageGetPayload(message);
-	if (!str)
-		return false;
-
-	struct json_object* root = json_tokener_parse(str);
-	struct json_object* label = 0;
-	bool failed = true;
-	int reset = 0;
-
-	if (!root || is_error(root))
-		goto Done;
-
-
-	// iterate through the elements
-	json_object_object_foreach(root, key, val)
-	{
-		if (strcmp(key, "enable") == 0)
-		{
-			label = json_object_object_get(root, "enable");
-
-			if (label && json_object_is_type(label, json_type_boolean))
-			{
-				PSoftContext2D::SetGlobalAttribute(0, json_object_get_boolean(label));
-#if defined(DIRECT_RENDERING)
-				PGLESContext2D::SetGlobalAttribute(0, json_object_get_boolean(label));
-#endif
-				failed = false;
-			}
-		}
-		else if (strcmp(key, "reset") == 0)
-		{
-			if (json_object_is_type(val, json_type_int))
-			{
-				reset = json_object_get_int(val);
-				PSoftContext2D::SetGlobalAttribute(5, reset);
-#if defined(DIRECT_RENDERING)
-				PGLESContext2D::SetGlobalAttribute(5, reset);
-#endif
-				failed = false;
-			}
-		}
-		else if (strcmp(key, "dump") == 0)
-		{
-			PSoftContext2D::SetGlobalAttribute(5, 1);
-#if defined(DIRECT_RENDERING)
-			PGLESContext2D::SetGlobalAttribute(5, 1);
-#endif
-			failed = false;
-		}
-		else
-		{
-			//Nothing to do.
-		}
-	}
-	
-Done:
-
-	json_object* reply = json_object_new_object();
-	json_object_object_add(reply, "returnValue", json_object_new_boolean(!failed));
-
-	LSError err;
-	LSErrorInit(&err);
-	if (!LSMessageReply(lsHandle, message, json_object_to_json_string(reply), &err))
-		LSErrorFree(&err);	
-
-	json_object_put(reply);
-
-	if (!root && !is_error(root))
-		json_object_put(root);
-*/
-	return true;
-}
 
 void WebAppManager::copiedToClipboard(const QString& appId)
 {
@@ -2612,6 +2295,43 @@ void WebAppManager::stopGcPowerdActivity()
 		LSErrorFree(&lsError);
 	}
 }
+
+/////////////////////////////////////////////////////////////////
+//                                                             //
+//            Start of API documentation comment block         //
+//                                                             //
+/////////////////////////////////////////////////////////////////
+/**
+@page com_palm_lunastats com.palm.lunastats
+@{
+@section com_palm_lunastats_getMemoryStatus getMemoryStatus
+
+Return the current memory status, as memchute has described it to webappmanager.
+If webappmanager is not built with memchute support, then this call will always return the normal state.
+
+@par Parameters
+
+Name | Required | Type | Description
+-----|--------|------|----------
+
+@par Returns(Call)
+
+Name | Required | Type | Description
+-----|--------|------|----------
+state       | yes | string | normal, low, or critical, depending on what memchute has most recently signalled
+returnValue | yes | bool   | Always true
+
+@par Returns(Subscription)
+
+Name | Required | Type | Description
+-----|--------|------|----------
+@}
+*/
+/////////////////////////////////////////////////////////////////
+//                                                             //
+//            End of API documentation comment block           //
+//                                                             //
+/////////////////////////////////////////////////////////////////
 
 bool PrvGetMemoryStatus(LSHandle* handle, LSMessage* message, void* ctxt)
 {

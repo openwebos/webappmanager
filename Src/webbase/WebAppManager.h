@@ -82,7 +82,6 @@ public:
 	WebAppBase* findApp(const QString& processId);
 	WebAppBase* findAppById(const QString& appId);
 
-	void initiateLunaStatsReporting();
 	LSHandle* getStatsServiceHandle() const;
 
 	void copiedToClipboard(const QString& appId);
