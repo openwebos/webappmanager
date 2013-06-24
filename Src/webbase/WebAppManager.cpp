@@ -16,12 +16,14 @@
 *
 * LICENSE@@@ */
 
+//->Start of API documentation comment block
 /**
 @page com_palm_lunastats com.webos.lunastats
 @brief Provides statistics for Luna webappmanager component. These are deprecated in favor of their com.webos.webappmanager counterparts.
 @{
 @}
 */
+//->End of API documentation comment block
 
 #include "Common.h"
 
@@ -1578,11 +1580,7 @@ LSHandle* WebAppManager::getStatsServiceHandle() const
 }
 
 #ifdef USE_HEAP_PROFILER
-/////////////////////////////////////////////////////////////////
-//                                                             //
-//            Start of API documentation comment block         //
-//                                                             //
-/////////////////////////////////////////////////////////////////
+//->Start of API documentation comment block
 /**
 @page com_palm_lunastats com.palm.lunastats
 @{
@@ -1591,28 +1589,18 @@ LSHandle* WebAppManager::getStatsServiceHandle() const
 Dump a snapshot of the heap profile to /log
 
 @par Parameters
-
-Name | Required | Type | Description
------|--------|------|----------
+None
 
 @par Returns(Call)
-
 Name | Required | Type | Description
 -----|--------|------|----------
 returnValue | yes | bool | Always true
 
 @par Returns(Subscription)
-
-Name | Required | Type | Description
------|--------|------|----------
+None
 @}
 */
-/////////////////////////////////////////////////////////////////
-//                                                             //
-//            End of API documentation comment block           //
-//                                                             //
-/////////////////////////////////////////////////////////////////
-
+//->End of API documentation comment block
 static bool PrvDumpHeapProfiler(LSHandle* lsHandle, LSMessage *message,
 								void *user_data)
 {
@@ -2296,11 +2284,7 @@ void WebAppManager::stopGcPowerdActivity()
 	}
 }
 
-/////////////////////////////////////////////////////////////////
-//                                                             //
-//            Start of API documentation comment block         //
-//                                                             //
-/////////////////////////////////////////////////////////////////
+//->Start of API documentation comment block
 /**
 @page com_palm_lunastats com.palm.lunastats
 @{
@@ -2310,28 +2294,19 @@ Return the current memory status, as memchute has described it to webappmanager.
 If webappmanager is not built with memchute support, then this call will always return the normal state.
 
 @par Parameters
-
-Name | Required | Type | Description
------|--------|------|----------
+None
 
 @par Returns(Call)
-
 Name | Required | Type | Description
 -----|--------|------|----------
 state       | yes | string | normal, low, or critical, depending on what memchute has most recently signalled
 returnValue | yes | bool   | Always true
 
 @par Returns(Subscription)
-
-Name | Required | Type | Description
------|--------|------|----------
+None
 @}
 */
-/////////////////////////////////////////////////////////////////
-//                                                             //
-//            End of API documentation comment block           //
-//                                                             //
-/////////////////////////////////////////////////////////////////
+//->End of API documentation comment block
 
 bool PrvGetMemoryStatus(LSHandle* handle, LSMessage* message, void* ctxt)
 {
