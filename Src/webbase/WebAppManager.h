@@ -20,7 +20,7 @@
  * 
  * Manages running web apps.
  *
- * @author Hewlett-Packard Development Company, L.P.
+ * @author LG Electronics
  * 
  */
 

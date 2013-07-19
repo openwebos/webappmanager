@@ -20,7 +20,7 @@
  * 
  * Base class for different types of app containers to derive from.
  *
- * @author Hewlett-Packard Development Company, L.P.
+ * @author LG Electronics
  * 
  */
 

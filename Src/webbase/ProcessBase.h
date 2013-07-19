@@ -20,7 +20,7 @@
  * 
  * Holds information about processes launched by LunaSysMgr
  *
- * @author Hewlett-Packard Development Company, L.P.
+ * @author LG Electronics
  * 
  */
 
